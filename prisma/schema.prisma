@@ -1,0 +1,64 @@
+// Prisma schema: the single source of truth for our database tables.
+// Prisma reads this file and (1) generates a typed client for our code and
+// (2) creates SQL migrations that build these tables in Postgres.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  // The connection URL lives in prisma.config.ts (Prisma 7 moved it there).
+}
+
+enum OrderStatus {
+  PREPARING
+  READY
+  DONE
+}
+
+model Shop {
+  id    String @id @default(cuid())
+  name  String
+  slug  String @unique
+
+  // Counter used to hand out the next customer-facing number (#1, #2, #3...).
+  lastOrderNumber Int @default(0)
+
+  // SHA-256 hash of the secret inside the shop's cashier link. We never store
+  // the secret itself, so a leaked database does not leak working links.
+  cashierTokenHash String? @unique
+
+  createdAt DateTime @default(now())
+  orders    Order[]
+}
+
+model Order {
+  id     String @id @default(cuid())
+  shopId String
+  shop   Shop   @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  // The number the customer sees (#27). Numbering is per shop.
+  number Int
+  status OrderStatus @default(PREPARING)
+
+  createdAt DateTime  @default(now())
+  readyAt   DateTime?
+  doneAt    DateTime?
+
+  // The secret inside this order's customer link: https://app/o/<claimToken>.
+  // Random and unguessable, so only someone who was given the link (by the QR
+  // scan, or from the cashier's screen) can watch this order.
+  claimToken String @unique
+
+  // Set when a phone has linked to this order. Null = nobody has yet.
+  // The shop's counter QR only hands out orders where this is still null.
+  claimedAt DateTime?
+
+  // Not unique on purpose: a number can be reused once its earlier order is
+  // DONE. "No two unfinished orders share a number" is enforced in code,
+  // inside a transaction that locks the shop row.
+  @@index([shopId, number])
+  @@index([shopId, status])
+}

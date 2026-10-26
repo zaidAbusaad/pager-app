@@ -1,0 +1,192 @@
+/* Customer screens: same Apple-style tokens as the cashier, big and simple. */
+.page {
+  --bg: #f2f2f7;
+  --card: #ffffff;
+  --label: #1c1c1e;
+  --label-2: #5f5f64;
+  --separator: rgba(60, 60, 67, 0.18);
+  --primary: #0071e3;
+  --primary-ink: #ffffff;
+  --orange: #b25e00;
+  --green: #1d7f3a;
+  --green-bg: #e6f6ea;
+  --danger: #c4231c;
+
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    "SF Pro Display", var(--font-geist-sans, system-ui), "Segoe UI",
+    system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--label);
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .page {
+    --bg: #000000;
+    --card: #1c1c1e;
+    --label: #ffffff;
+    --label-2: #aeaeb2;
+    --separator: rgba(84, 84, 88, 0.65);
+    --orange: #ff9f0a;
+    --green: #30d158;
+    --green-bg: #0f2f18;
+    --danger: #ff6961;
+  }
+}
+
+.card {
+  width: min(100%, 420px);
+  background: var(--card);
+  border-radius: 28px;
+  padding: 36px 24px 28px;
+  text-align: center;
+  display: grid;
+  gap: 14px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 12px 40px rgba(0, 0, 0, 0.06);
+  transition: background 0.4s ease;
+}
+
+.card[data-state="ready"] {
+  background: var(--green-bg);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+.shop {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--label-2);
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.hint {
+  font-size: 16px;
+  line-height: 1.4;
+  color: var(--label-2);
+}
+
+.number {
+  font-size: clamp(88px, 28vw, 128px);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.hash {
+  color: var(--label-2);
+  font-weight: 500;
+  margin-inline-end: 4px;
+}
+
+.status {
+  font-size: 22px;
+  font-weight: 650;
+}
+
+.status[data-state="preparing"] {
+  color: var(--orange);
+}
+
+.status[data-state="ready"] {
+  color: var(--green);
+}
+
+.button {
+  appearance: none;
+  border: 0;
+  border-radius: 999px;
+  min-height: 52px;
+  padding: 0 28px;
+  font: inherit;
+  font-size: 18px;
+  font-weight: 600;
+  background: var(--primary);
+  color: var(--primary-ink);
+  cursor: pointer;
+  transition: transform 0.12s ease, opacity 0.2s ease;
+}
+
+.button:active {
+  transform: scale(0.97);
+}
+
+.button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.button:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 3px;
+}
+
+.quiet {
+  appearance: none;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 15px;
+  color: var(--primary);
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.error {
+  font-size: 15px;
+  color: var(--danger);
+}
+
+@keyframes pulse {
+  50% {
+    transform: scale(1.015);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card[data-state="ready"] {
+    animation: none;
+  }
+  .button {
+    transition: none;
+  }
+}
+
+.form {
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+}
+
+.input {
+  width: 100%;
+  max-width: 220px;
+  min-height: 64px;
+  border: 0;
+  border-radius: 18px;
+  background: var(--bg);
+  color: var(--label);
+  font: inherit;
+  font-size: 32px;
+  font-weight: 650;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.input::placeholder {
+  color: var(--label-2);
+  opacity: 0.55;
+}
+
+.input:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+}
