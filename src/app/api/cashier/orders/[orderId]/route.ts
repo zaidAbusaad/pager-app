@@ -20,3 +20,16 @@ export async function PATCH(
     return Response.json(toOrderDto(order));
   });
 }
+
+// DELETE /api/cashier/orders/:orderId   (pending orders only)
+export async function DELETE(
+  request: NextRequest,
+  ctx: RouteContext<"/api/cashier/orders/[orderId]">,
+) {
+  return handle(async () => {
+    const shop = await requireCashier(request);
+    const { orderId } = orderParams.parse(await ctx.params);
+    await orderService.deleteOrder(shop.id, orderId);
+    return new Response(null, { status: 204 });
+  });
+}

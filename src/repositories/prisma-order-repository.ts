@@ -5,6 +5,7 @@ import type {
   CreateOrderInput,
   CreateOrderResult,
   OrderRepository,
+  ReopenResult,
 } from "./order-repository";
 
 const ACTIVE_STATUSES: OrderStatus[] = ["PREPARING", "READY"];
@@ -35,6 +36,12 @@ export class PrismaOrderRepository implements OrderRepository {
       if (requestedNumber !== undefined) {
         if (await isTaken(requestedNumber)) return { kind: "number_taken" };
         number = requestedNumber;
+        // Continue from the number the cashier typed (his own invoice
+        // numbers): the next automatic order is typed number + 1.
+        await tx.shop.update({
+          where: { id: shopId },
+          data: { lastOrderNumber: number },
+        });
       } else {
         const shop = await tx.shop.findUniqueOrThrow({
           where: { id: shopId },
@@ -53,6 +60,25 @@ export class PrismaOrderRepository implements OrderRepository {
       });
       return { kind: "created", order };
     });
+  }
+
+  async peekNextNumber(shopId: string): Promise<number> {
+    const prisma = getPrisma();
+    const shop = await prisma.shop.findUnique({
+      where: { id: shopId },
+      select: { lastOrderNumber: true },
+    });
+    let number = (shop?.lastOrderNumber ?? 0) + 1;
+    // same skipping rule as creation: never suggest a number in use
+    while (
+      (await prisma.order.findFirst({
+        where: { shopId, number, status: { in: ACTIVE_STATUSES } },
+        select: { id: true },
+      })) !== null
+    ) {
+      number += 1;
+    }
+    return number;
   }
 
   findById(id: string): Promise<Order | null> {
@@ -93,6 +119,65 @@ export class PrismaOrderRepository implements OrderRepository {
     });
     if (result.count === 0) return null;
     return prisma.order.findUnique({ where: { id } });
+  }
+
+  async reopenDone(id: string, patch: StatusPatch): Promise<ReopenResult> {
+    return getPrisma().$transaction(async (tx): Promise<ReopenResult> => {
+      const order = await tx.order.findUnique({ where: { id } });
+      if (!order || order.status !== "DONE") return { kind: "not_done" };
+
+      // Same shop lock as createForShop, so a new order cannot take this
+      // number between our check and our update.
+      await tx.$queryRaw`
+        SELECT "id" FROM "Shop" WHERE "id" = ${order.shopId} FOR UPDATE
+      `;
+      const clash = await tx.order.findFirst({
+        where: {
+          shopId: order.shopId,
+          number: order.number,
+          status: { in: ACTIVE_STATUSES },
+          NOT: { id },
+        },
+        select: { id: true },
+      });
+      if (clash) return { kind: "number_taken" };
+
+      const result = await tx.order.updateMany({
+        where: { id, status: "DONE" },
+        data: { status: "READY", ...patch },
+      });
+      if (result.count === 0) return { kind: "not_done" };
+      return {
+        kind: "reopened",
+        order: await tx.order.findUniqueOrThrow({ where: { id } }),
+      };
+    });
+  }
+
+  async deletePreparing(id: string): Promise<boolean> {
+    return getPrisma().$transaction(async (tx) => {
+      const order = await tx.order.findUnique({
+        where: { id },
+        select: { shopId: true, number: true, status: true },
+      });
+      if (!order || order.status !== "PREPARING") return false;
+
+      await tx.$queryRaw`
+        SELECT "id" FROM "Shop" WHERE "id" = ${order.shopId} FOR UPDATE
+      `;
+      const result = await tx.order.deleteMany({
+        where: { id, status: "PREPARING" },
+      });
+      if (result.count === 0) return false;
+
+      // If this was the latest number handed out, give it back, so the next
+      // order gets the same number again (no gap in the cashier's invoices).
+      await tx.shop.updateMany({
+        where: { id: order.shopId, lastOrderNumber: order.number },
+        data: { lastOrderNumber: order.number - 1 },
+      });
+      return true;
+    });
   }
 
   async claimLatestForShop(

@@ -10,9 +10,16 @@ import { createOrderBody } from "@/validation/order-schemas";
 export async function GET(request: NextRequest) {
   return handle(async () => {
     const shop = await requireCashier(request);
-    const orders = await orderService.listBoard(shop.id);
+    const [orders, nextNumber] = await Promise.all([
+      orderService.listBoard(shop.id),
+      orderService.getNextNumber(shop.id),
+    ]);
     return Response.json(
-      { shop: { name: shop.name }, orders: orders.map(toOrderDto) },
+      {
+        shop: { name: shop.name },
+        orders: orders.map(toOrderDto),
+        nextNumber,
+      },
       { headers: { "Cache-Control": "no-store" } },
     );
   });

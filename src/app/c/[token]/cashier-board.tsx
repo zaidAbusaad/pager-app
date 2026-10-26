@@ -24,6 +24,7 @@ interface OrderDto {
 interface Board {
   shopName: string;
   orders: OrderDto[];
+  nextNumber: number; // what an order created without a number would get
 }
 
 type Flash = { kind: "ok" | "error"; text: string } | null;
@@ -85,6 +86,8 @@ export function CashierBoard({ token }: { token: string }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [qr, setQr] = useState<{ token: string; url: string } | null>(null);
   const [confirmReset, setConfirmReset] = useState(false);
+  // The pending order whose Delete button was tapped once (it asks again).
+  const [armedDeleteId, setArmedDeleteId] = useState<string | null>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   // One helper for every request: adds the secret as a Bearer token.
@@ -110,7 +113,11 @@ export function CashierBoard({ token }: { token: string }) {
       }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      setBoard({ shopName: data.shop.name, orders: data.orders });
+      setBoard({
+        shopName: data.shop.name,
+        orders: data.orders,
+        nextNumber: data.nextNumber,
+      });
       setProblem(null);
     } catch {
       setProblem("offline");
@@ -233,6 +240,18 @@ export function CashierBoard({ token }: { token: string }) {
     }
   }
 
+  // Delete needs two taps so a slip of the finger cannot remove an order.
+  async function deletePending(id: string) {
+    if (armedDeleteId !== id) {
+      setArmedDeleteId(id);
+      setTimeout(() => setArmedDeleteId((cur) => (cur === id ? null : cur)), 3000);
+      return;
+    }
+    setArmedDeleteId(null);
+    const error = await act(() => call(`/${id}`, { method: "DELETE" }));
+    show(error ? "error" : "ok", error ?? "Order deleted");
+  }
+
   async function setStatus(id: string, status: OrderStatus) {
     const error = await act(() =>
       call(`/${id}`, { method: "PATCH", body: JSON.stringify({ status }) }),
@@ -265,7 +284,7 @@ export function CashierBoard({ token }: { token: string }) {
                 className={styles.input}
                 inputMode="numeric"
                 maxLength={4}
-                placeholder="Next number"
+                placeholder={board ? `Next: ${board.nextNumber}` : "Next number"}
                 aria-label="Order number (optional)"
                 value={numberInput}
                 onChange={(e) => setNumberInput(e.target.value)}
@@ -380,13 +399,36 @@ export function CashierBoard({ token }: { token: string }) {
                             </div>
 
                             {order.status === "PREPARING" && (
+                              <span className={styles.actions}>
+                                <button
+                                  className={styles.pillDanger}
+                                  data-armed={armedDeleteId === order.id}
+                                  onClick={() => deletePending(order.id)}
+                                  disabled={busy}
+                                  aria-label={`Delete order ${order.number}`}
+                                >
+                                  {armedDeleteId === order.id
+                                    ? "Confirm"
+                                    : "Delete"}
+                                </button>
+                                <button
+                                  className={styles.pillPrimary}
+                                  onClick={() => setStatus(order.id, "READY")}
+                                  disabled={busy}
+                                  aria-label={`Mark order ${order.number} ready`}
+                                >
+                                  Ready
+                                </button>
+                              </span>
+                            )}
+                            {order.status === "DONE" && (
                               <button
-                                className={styles.pillPrimary}
+                                className={styles.pillQuiet}
                                 onClick={() => setStatus(order.id, "READY")}
                                 disabled={busy}
-                                aria-label={`Mark order ${order.number} ready`}
+                                aria-label={`Undo collected for order ${order.number}`}
                               >
-                                Ready
+                                Undo
                               </button>
                             )}
                             {order.status === "READY" && (

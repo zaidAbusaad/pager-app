@@ -88,6 +88,15 @@ The cashier board shows who is linked: green "Phone linked" or grey
 > address (e.g. `http://192.168.1.20:3000/c/<token>`), not `localhost`:
 > the QR codes contain the address you opened the board with.
 
+Cashier numbering: type a number once (e.g. your invoice number 1500) and the
+next orders continue from it (1501, 1502, ...). The box shows the next number.
+Deleting the latest pending order gives its number back.
+
+Cashier undo: **Undo** on a Ready order moves it back to Pending, **Undo** on a
+Collected order reopens it as Ready (refused if its number is already used by
+a newer open order). **Delete** (two taps) removes a Pending order only.
+`DELETE /api/cashier/orders/:orderId` is the matching API call.
+
 Numbers: no two unfinished orders in a shop share a number, but a number can be
 reused once its order is collected. The automatic counter skips taken numbers.
 

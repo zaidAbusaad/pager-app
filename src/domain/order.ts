@@ -25,11 +25,11 @@ export interface StatusPatch {
 //   PREPARING -> READY      cashier taps "ready"
 //   READY     -> DONE       customer collected the order
 //   READY     -> PREPARING  undo, "ready" was tapped by mistake
-//   DONE      -> nothing    finished orders never come back
+//   DONE      -> READY      undo, "collected" was tapped by mistake
 const ALLOWED_TRANSITIONS: Record<OrderStatus, readonly OrderStatus[]> = {
   PREPARING: ["READY"],
   READY: ["DONE", "PREPARING"],
-  DONE: [],
+  DONE: ["READY"],
 };
 
 export function canTransition(from: OrderStatus, to: OrderStatus): boolean {

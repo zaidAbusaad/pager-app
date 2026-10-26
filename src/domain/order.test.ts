@@ -12,14 +12,14 @@ describe("order status rules", () => {
     ["PREPARING", "READY"],
     ["READY", "DONE"],
     ["READY", "PREPARING"], // undo a mistaken "ready"
+    ["DONE", "READY"], // undo a mistaken "collected"
   ])("allows %s -> %s", (from, to) => {
     expect(canTransition(from, to)).toBe(true);
   });
 
   it.each<[OrderStatus, OrderStatus]>([
     ["PREPARING", "DONE"], // must be ready before it can be collected
-    ["DONE", "PREPARING"], // finished orders never come back
-    ["DONE", "READY"],
+    ["DONE", "PREPARING"], // a collected order can only go back to READY
     ["PREPARING", "PREPARING"],
     ["READY", "READY"],
   ])("rejects %s -> %s", (from, to) => {

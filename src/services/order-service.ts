@@ -46,6 +46,33 @@ export function createOrderService({
       }
     },
 
+    // The number the next automatic order will get (shown on the board).
+    getNextNumber(shopId: string): Promise<number> {
+      return orders.peekNextNumber(shopId);
+    },
+
+    // Deletes a PENDING order (created by mistake). Collected or ready orders
+    // are never deleted, so the day's record stays honest.
+    async deleteOrder(shopId: string, orderId: string): Promise<void> {
+      const current = await orders.findById(orderId);
+      if (!current || current.shopId !== shopId) {
+        throw new DomainError("NOT_FOUND", "Order not found");
+      }
+      if (current.status !== "PREPARING") {
+        throw new DomainError(
+          "INVALID_TRANSITION",
+          "Only pending orders can be deleted.",
+        );
+      }
+      const deleted = await orders.deletePreparing(orderId);
+      if (!deleted) {
+        throw new DomainError(
+          "CONFLICT",
+          "The order was changed by someone else. Please retry.",
+        );
+      }
+    },
+
     // Everything the cashier screen needs: unfinished orders first,
     // then the most recently collected ones.
     async listBoard(shopId: string): Promise<Order[]> {
@@ -87,6 +114,25 @@ export function createOrderService({
       if (current.status === to) return current;
 
       assertCanTransition(current.status, to);
+
+      // Undo "collected": the order's number may have been reused meanwhile.
+      if (current.status === "DONE") {
+        const result = await orders.reopenDone(orderId, statusPatch(to, now()));
+        switch (result.kind) {
+          case "reopened":
+            return result.order;
+          case "number_taken":
+            throw new DomainError(
+              "CONFLICT",
+              `Number #${current.number} is now used by another order, so this one cannot be reopened.`,
+            );
+          case "not_done":
+            throw new DomainError(
+              "CONFLICT",
+              "The order was changed by someone else. Please retry.",
+            );
+        }
+      }
 
       const updated = await orders.transition(
         orderId,

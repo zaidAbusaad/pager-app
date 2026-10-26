@@ -64,9 +64,9 @@ describe("order service", () => {
 
       it("makes the automatic counter skip numbers that are taken", async () => {
         await service.createOrder("shop-1", 2); // typed by hand
-        const a = await service.createOrder("shop-1"); // -> 1
-        const b = await service.createOrder("shop-1"); // 2 is taken -> 3
-        expect([a.number, b.number]).toEqual([1, 3]);
+        await service.createOrder("shop-1", 1); // counter goes back to 1
+        const next = await service.createOrder("shop-1"); // 2 is taken -> 3
+        expect(next.number).toBe(3);
       });
     });
   });
@@ -142,13 +142,35 @@ describe("order service", () => {
       ).rejects.toMatchObject({ code: "INVALID_TRANSITION" });
     });
 
-    it("refuses to reopen a DONE order", async () => {
+    it("reopens a collected order as READY (undo collected)", async () => {
+      const order = await service.createOrder("shop-1", 27);
+      await service.setStatus("shop-1", order.id, "READY");
+      await service.setStatus("shop-1", order.id, "DONE");
+      clock = new Date("2026-10-22T13:00:00Z");
+      const reopened = await service.setStatus("shop-1", order.id, "READY");
+      expect(reopened.status).toBe("READY");
+      expect(reopened.doneAt).toBeNull();
+      expect(reopened.readyAt).toEqual(clock);
+    });
+
+    it("cannot reopen a collected order straight to PREPARING", async () => {
       const order = await service.createOrder("shop-1");
       await service.setStatus("shop-1", order.id, "READY");
       await service.setStatus("shop-1", order.id, "DONE");
       await expect(
-        service.setStatus("shop-1", order.id, "READY"),
+        service.setStatus("shop-1", order.id, "PREPARING"),
       ).rejects.toMatchObject({ code: "INVALID_TRANSITION" });
+    });
+
+    it("cannot reopen a collected order whose number was reused", async () => {
+      const first = await service.createOrder("shop-1", 27);
+      await service.setStatus("shop-1", first.id, "READY");
+      await service.setStatus("shop-1", first.id, "DONE");
+      await service.createOrder("shop-1", 27); // number reused by a new order
+      const attempt = service.setStatus("shop-1", first.id, "READY");
+      await expect(attempt).rejects.toMatchObject({ code: "CONFLICT" });
+      await expect(attempt).rejects.toThrow("#27");
+      expect((await repo.findById(first.id))?.status).toBe("DONE");
     });
 
     it("reports CONFLICT if the order changed while we were updating", async () => {
@@ -187,6 +209,78 @@ describe("order service", () => {
       expect((await repo.findById(theirs.id))?.claimToken).toBe(
         theirs.claimToken,
       );
+    });
+  });
+
+  describe("numbering follows the cashier's own numbers", () => {
+    it("continues from a typed number", async () => {
+      await service.createOrder("shop-1", 1500);
+      const next = await service.createOrder("shop-1");
+      const after = await service.createOrder("shop-1");
+      expect([next.number, after.number]).toEqual([1501, 1502]);
+    });
+
+    it("shows the number the next automatic order will get", async () => {
+      expect(await service.getNextNumber("shop-1")).toBe(1);
+      await service.createOrder("shop-1", 1500);
+      expect(await service.getNextNumber("shop-1")).toBe(1501);
+    });
+
+    it("never suggests a number that is already in use", async () => {
+      await service.createOrder("shop-1", 1501);
+      await service.createOrder("shop-1", 1500); // counter now 1500
+      expect(await service.getNextNumber("shop-1")).toBe(1502);
+    });
+  });
+
+  describe("deleteOrder", () => {
+    it("deletes a pending order", async () => {
+      const order = await service.createOrder("shop-1");
+      await service.deleteOrder("shop-1", order.id);
+      expect(await repo.findById(order.id)).toBeNull();
+    });
+
+    it("gives back the number if it was the latest one issued", async () => {
+      await service.createOrder("shop-1", 1500);
+      const mistake = await service.createOrder("shop-1"); // 1501
+      await service.deleteOrder("shop-1", mistake.id);
+      const again = await service.createOrder("shop-1");
+      expect(again.number).toBe(1501);
+    });
+
+    it("does not roll the counter back when a later order exists", async () => {
+      const a = await service.createOrder("shop-1"); // 1
+      await service.createOrder("shop-1"); // 2
+      await service.deleteOrder("shop-1", a.id);
+      const next = await service.createOrder("shop-1");
+      expect(next.number).toBe(3);
+    });
+
+    it("refuses to delete a ready or collected order", async () => {
+      const order = await service.createOrder("shop-1");
+      await service.setStatus("shop-1", order.id, "READY");
+      await expect(
+        service.deleteOrder("shop-1", order.id),
+      ).rejects.toMatchObject({ code: "INVALID_TRANSITION" });
+      await service.setStatus("shop-1", order.id, "DONE");
+      await expect(
+        service.deleteOrder("shop-1", order.id),
+      ).rejects.toMatchObject({ code: "INVALID_TRANSITION" });
+      expect(await repo.findById(order.id)).not.toBeNull();
+    });
+
+    it("cannot delete another shop's order", async () => {
+      const theirs = await service.createOrder("shop-2");
+      await expect(
+        service.deleteOrder("shop-1", theirs.id),
+      ).rejects.toMatchObject({ code: "NOT_FOUND" });
+      expect(await repo.findById(theirs.id)).not.toBeNull();
+    });
+
+    it("fails with NOT_FOUND for an unknown order", async () => {
+      await expect(
+        service.deleteOrder("shop-1", "nope"),
+      ).rejects.toMatchObject({ code: "NOT_FOUND" });
     });
   });
 });

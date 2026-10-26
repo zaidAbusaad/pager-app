@@ -180,6 +180,17 @@
   color: var(--label);
 }
 
+/* destructive action: red text, solid red once armed by the first tap */
+.pillDanger {
+  composes: pillQuiet;
+  color: var(--live-bad);
+}
+
+.pillDanger[data-armed="true"] {
+  background: var(--danger-solid);
+  color: #ffffff;
+}
+
 .pillPrimary:active,
 .pillQuiet:active {
   transform: scale(0.96);
@@ -195,6 +206,7 @@
 .input:focus-visible,
 .segment:focus-visible,
 .pillPrimary:focus-visible,
+.pillDanger:focus-visible,
 .pillQuiet:focus-visible {
   outline: 3px solid color-mix(in srgb, var(--primary) 65%, transparent);
   outline-offset: 2px;

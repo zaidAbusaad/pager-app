@@ -4,6 +4,7 @@ import type {
   CreateOrderInput,
   CreateOrderResult,
   OrderRepository,
+  ReopenResult,
 } from "@/repositories/order-repository";
 
 // A fake repository that keeps orders in memory instead of a database.
@@ -36,6 +37,7 @@ export class InMemoryOrderRepository implements OrderRepository {
     if (requestedNumber !== undefined) {
       if (this.isTaken(shopId, requestedNumber)) return { kind: "number_taken" };
       number = requestedNumber;
+      this.counters.set(shopId, number); // typed number continues the sequence
     } else {
       number = (this.counters.get(shopId) ?? 0) + 1;
       while (this.isTaken(shopId, number)) number += 1;
@@ -55,6 +57,12 @@ export class InMemoryOrderRepository implements OrderRepository {
     };
     this.orders.set(order.id, order);
     return { kind: "created", order };
+  }
+
+  async peekNextNumber(shopId: string): Promise<number> {
+    let number = (this.counters.get(shopId) ?? 0) + 1;
+    while (this.isTaken(shopId, number)) number += 1;
+    return number;
   }
 
   async findById(id: string): Promise<Order | null> {
@@ -91,6 +99,25 @@ export class InMemoryOrderRepository implements OrderRepository {
     const updated = { ...order, status: to, ...patch };
     this.orders.set(id, updated);
     return updated;
+  }
+
+  async reopenDone(id: string, patch: StatusPatch): Promise<ReopenResult> {
+    const order = this.orders.get(id);
+    if (!order || order.status !== "DONE") return { kind: "not_done" };
+    if (this.isTaken(order.shopId, order.number)) return { kind: "number_taken" };
+    const updated = { ...order, status: "READY" as const, ...patch };
+    this.orders.set(id, updated);
+    return { kind: "reopened", order: updated };
+  }
+
+  async deletePreparing(id: string): Promise<boolean> {
+    const order = this.orders.get(id);
+    if (!order || order.status !== "PREPARING") return false;
+    this.orders.delete(id);
+    if (this.counters.get(order.shopId) === order.number) {
+      this.counters.set(order.shopId, order.number - 1);
+    }
+    return true;
   }
 
   async claimLatestForShop(
