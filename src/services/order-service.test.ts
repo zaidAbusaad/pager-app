@@ -233,17 +233,34 @@ describe("order service", () => {
     });
   });
 
-  describe("deleteOrder", () => {
-    it("deletes a pending order", async () => {
+  describe("cancelOrder", () => {
+    it("cancels a pending order but keeps it for the statistics", async () => {
       const order = await service.createOrder("shop-1");
-      await service.deleteOrder("shop-1", order.id);
-      expect(await repo.findById(order.id)).toBeNull();
+      await service.cancelOrder("shop-1", order.id);
+      expect((await repo.findById(order.id))?.status).toBe("CANCELLED");
+    });
+
+    it("removes a cancelled order from the cashier board and frees its number", async () => {
+      await service.createOrder("shop-1", 7);
+      const mistake = await service.createOrder("shop-1", 8);
+      await service.cancelOrder("shop-1", mistake.id);
+      expect((await service.listBoard("shop-1")).map((o) => o.number)).toEqual([7]);
+      // number 8 is free again
+      await expect(service.createOrder("shop-1", 8)).resolves.toMatchObject({ number: 8 });
+    });
+
+    it("cannot change a cancelled order's status", async () => {
+      const order = await service.createOrder("shop-1");
+      await service.cancelOrder("shop-1", order.id);
+      await expect(service.setStatus("shop-1", order.id, "READY")).rejects.toMatchObject({
+        code: "INVALID_TRANSITION",
+      });
     });
 
     it("gives back the number if it was the latest one issued", async () => {
       await service.createOrder("shop-1", 1500);
       const mistake = await service.createOrder("shop-1"); // 1501
-      await service.deleteOrder("shop-1", mistake.id);
+      await service.cancelOrder("shop-1", mistake.id);
       const again = await service.createOrder("shop-1");
       expect(again.number).toBe(1501);
     });
@@ -251,36 +268,68 @@ describe("order service", () => {
     it("does not roll the counter back when a later order exists", async () => {
       const a = await service.createOrder("shop-1"); // 1
       await service.createOrder("shop-1"); // 2
-      await service.deleteOrder("shop-1", a.id);
+      await service.cancelOrder("shop-1", a.id);
       const next = await service.createOrder("shop-1");
       expect(next.number).toBe(3);
     });
 
-    it("refuses to delete a ready or collected order", async () => {
+    it("refuses to cancel a ready or collected order", async () => {
       const order = await service.createOrder("shop-1");
       await service.setStatus("shop-1", order.id, "READY");
       await expect(
-        service.deleteOrder("shop-1", order.id),
+        service.cancelOrder("shop-1", order.id),
       ).rejects.toMatchObject({ code: "INVALID_TRANSITION" });
       await service.setStatus("shop-1", order.id, "DONE");
       await expect(
-        service.deleteOrder("shop-1", order.id),
+        service.cancelOrder("shop-1", order.id),
       ).rejects.toMatchObject({ code: "INVALID_TRANSITION" });
       expect(await repo.findById(order.id)).not.toBeNull();
     });
 
-    it("cannot delete another shop's order", async () => {
+    it("cannot cancel another shop's order", async () => {
       const theirs = await service.createOrder("shop-2");
       await expect(
-        service.deleteOrder("shop-1", theirs.id),
+        service.cancelOrder("shop-1", theirs.id),
       ).rejects.toMatchObject({ code: "NOT_FOUND" });
       expect(await repo.findById(theirs.id)).not.toBeNull();
     });
 
     it("fails with NOT_FOUND for an unknown order", async () => {
       await expect(
-        service.deleteOrder("shop-1", "nope"),
+        service.cancelOrder("shop-1", "nope"),
       ).rejects.toMatchObject({ code: "NOT_FOUND" });
+    });
+  });
+
+  describe("error reasons (translated by the screens)", () => {
+    it("tells the screen WHICH number is already in use", async () => {
+      await service.createOrder("shop-1", 27);
+      await expect(service.createOrder("shop-1", 27)).rejects.toMatchObject({
+        code: "CONFLICT",
+        reason: "NUMBER_IN_USE",
+        number: 27,
+      });
+    });
+
+    it("tells the screen when reopening is blocked by a reused number", async () => {
+      const first = await service.createOrder("shop-1", 27);
+      await service.setStatus("shop-1", first.id, "READY");
+      await service.setStatus("shop-1", first.id, "DONE");
+      await service.createOrder("shop-1", 27);
+      await expect(
+        service.setStatus("shop-1", first.id, "READY"),
+      ).rejects.toMatchObject({ reason: "REOPEN_NUMBER_TAKEN", number: 27 });
+    });
+
+    it("uses ONLY_PENDING_CANCEL and ORDER_NOT_FOUND for cancel failures", async () => {
+      const order = await service.createOrder("shop-1");
+      await service.setStatus("shop-1", order.id, "READY");
+      await expect(
+        service.cancelOrder("shop-1", order.id),
+      ).rejects.toMatchObject({ reason: "ONLY_PENDING_CANCEL" });
+      await expect(
+        service.cancelOrder("shop-1", "nope"),
+      ).rejects.toMatchObject({ reason: "ORDER_NOT_FOUND" });
     });
   });
 });

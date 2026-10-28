@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ORDER_STATUSES } from "@/domain/order";
+import { SETTABLE_STATUSES } from "@/domain/order";
 
 // Zod checks untrusted input at the edge of the app. If it does not match,
 // it throws a ZodError that `handle()` turns into a 400 response.
@@ -24,7 +24,7 @@ export const claimBody = z.object({
 });
 
 export const statusBody = z.object({
-  status: z.enum(ORDER_STATUSES),
+  status: z.enum(SETTABLE_STATUSES),
 });
 
 // Body of POST /api/cashier/orders. "number" is optional: leave it out and the

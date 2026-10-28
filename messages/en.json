@@ -1,0 +1,406 @@
+{
+  "common": {
+    "loading": "Loading…",
+    "switchTo": "العربية",
+    "brand": "Pager"
+  },
+  "meta": {
+    "home": "Digital pager for restaurants and cafes",
+    "cashier": "Cashier",
+    "claim": "Find your order",
+    "order": "Your order",
+    "login": "Log in",
+    "signup": "Create an account",
+    "account": "Your account",
+    "poster": "QR poster",
+    "dashboard": "Dashboard"
+  },
+  "home": {
+    "title": "Digital pager for restaurants and cafes",
+    "soon": "Coming soon."
+  },
+  "cashier": {
+    "defaultTitle": "Cashier",
+    "live": "Live",
+    "reconnecting": "Reconnecting",
+    "locked": "Locked",
+    "nextNumber": "Next number",
+    "nextNumberValue": "Next: {number}",
+    "numberAria": "Order number (optional)",
+    "newOrder": "New order",
+    "invalidLink": "This cashier link is not valid. Ask the shop owner for a new one.",
+    "showOrders": "Show orders",
+    "stages": {
+      "pending": {
+        "label": "Pending",
+        "empty": "No pending orders",
+        "hint": "New orders show up here."
+      },
+      "ready": {
+        "label": "Ready",
+        "empty": "Nothing ready yet",
+        "hint": "Orders you mark ready wait here for pickup."
+      },
+      "done": {
+        "label": "Collected",
+        "empty": "Nothing collected yet",
+        "hint": "Picked-up orders are listed here."
+      }
+    },
+    "collected": "Collected",
+    "collectedAt": "Collected at {time}",
+    "phoneLinked": "Phone linked",
+    "noPhone": "No phone · QR",
+    "badgeAriaLinked": "Order {number}: phone linked, open QR options",
+    "badgeAriaNone": "Order {number}: no phone linked, show QR",
+    "ready": "Ready",
+    "undo": "Undo",
+    "collectedButton": "Collected",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "ariaReady": "Mark order {number} ready",
+    "ariaUndoReady": "Undo ready for order {number}",
+    "ariaCollected": "Order {number} collected",
+    "ariaCancel": "Cancel order {number}",
+    "ariaUndoCollected": "Undo collected for order {number}",
+    "sheet": {
+      "aria": "QR code for order {number}",
+      "ariaGeneric": "QR code",
+      "hint": "Customer: scan this with your phone camera.",
+      "alt": "QR code that opens order {number}",
+      "drawing": "Drawing QR…",
+      "linked": "Phone linked",
+      "waiting": "Waiting for a scan",
+      "reset": "Reset link",
+      "resetConfirm": "Tap again to reset",
+      "done": "Done"
+    },
+    "toast": {
+      "created": "Order created",
+      "createdNumber": "Order #{number} created",
+      "badNumber": "Enter a number from 1 to 9999, or leave it empty.",
+      "badNumberShort": "Enter a number from 1 to 9999.",
+      "linkReset": "Link reset. Show the new QR.",
+      "cancelled": "Order cancelled"
+    }
+  },
+  "claim": {
+    "finding": "Finding your order…",
+    "moment": "One moment.",
+    "shopMissing": "Shop not found",
+    "qrInvalid": "This QR code is not valid. Please ask the staff.",
+    "title": "Link your order",
+    "typeNumber": "Type the order number the cashier gave you.",
+    "placeholder": "27",
+    "numberAria": "Order number",
+    "linkButton": "Link my order",
+    "linking": "Linking…",
+    "tryAgain": "Try again",
+    "enterNumber": "Enter the number from your receipt."
+  },
+  "tracker": {
+    "notFound": "Order not found",
+    "linkInvalid": "This link is no longer valid. Please ask the cashier for your QR.",
+    "numberAria": "Order number {number}",
+    "preparing": "Being prepared…",
+    "keepOpen": "Keep this page open. We will ring when it is ready.",
+    "soundOn": "Turn on sound",
+    "notMine": "Not my order?",
+    "ready": "Your order is ready!",
+    "collect": "Please collect it at the counter.",
+    "collected": "Collected",
+    "thanks": "Thank you, enjoy!",
+    "titleReady": "READY - #{number}",
+    "titleWaiting": "#{number} - {shop}",
+    "cancelled": "This order was cancelled.",
+    "cancelledHint": "Please ask the staff if you have a question."
+  },
+  "auth": {
+    "loginTitle": "Log in",
+    "signupTitle": "Create your account",
+    "email": "Email",
+    "password": "Password",
+    "passwordHint": "At least 8 characters.",
+    "loginButton": "Log in",
+    "signupButton": "Create account",
+    "working": "One moment…",
+    "noAccount": "New here?",
+    "haveAccount": "Already have an account?",
+    "signupLink": "Create an account",
+    "loginLink": "Log in"
+  },
+  "account": {
+    "title": "Your account",
+    "signedInAs": "Signed in as",
+    "soon": "Your branches will appear here soon.",
+    "logout": "Log out",
+    "branches": "Your branches",
+    "noBranches": "You have no branches yet. Add your first one below.",
+    "branchName": "Branch name",
+    "addBranch": "Add branch",
+    "customerLink": "Customer QR",
+    "customerLinkHelp": "Customers scan the QR of this link at the counter.",
+    "cashierLink": "Cashier link",
+    "cashierLinkOnce": "Save this link now. For security it is shown only once.",
+    "cashierLinkHidden": "The cashier link is hidden for security. You can make a new one.",
+    "newCashierLink": "Make a new cashier link",
+    "confirmNewLink": "Tap again: the old link will stop working",
+    "copy": "Copy",
+    "copied": "Copied",
+    "showQr": "QR",
+    "showLink": "Link",
+    "downloadQr": "Download QR",
+    "qrAlt": "QR code for {name}",
+    "printPoster": "Print QR poster"
+  },
+  "poster": {
+    "title": "QR poster",
+    "back": "Back",
+    "notFound": "Branch not found",
+    "size": "Size",
+    "sizes": {
+      "a4": "A4",
+      "a5": "A5",
+      "s10": "10 cm"
+    },
+    "design": "Design",
+    "designs": {
+      "clean": "Clean",
+      "bold": "Bold",
+      "wallpaper": "Wallpaper",
+      "dark": "Dark"
+    },
+    "color": "Colour",
+    "language": "Poster language",
+    "languages": {
+      "both": "Arabic + English",
+      "ar": "Arabic",
+      "en": "English"
+    },
+    "print": "Print",
+    "printHint": "Print: in the print window turn on “Background graphics” so the colours print (or choose “Save as PDF”). Download saves a print-quality PNG image.",
+    "download": "Download",
+    "preparing": "Preparing…"
+  },
+  "nav": {
+    "title": "Owner area",
+    "branches": "Branches",
+    "dashboard": "Dashboard",
+    "soon": "Soon",
+    "logout": "Log out"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "range": "Time range",
+    "ranges": {
+      "today": "Today",
+      "d7": "Last 7 days",
+      "d30": "Last 30 days"
+    },
+    "branch": "Branch",
+    "allBranches": "All branches",
+    "orders": "Orders",
+    "empty": "No orders in this period yet. Statistics appear as soon as your cashier starts entering orders.",
+    "deltaNew": "No orders in the previous period",
+    "deltaSame": "Same as the previous period",
+    "deltaPercent": "{percent}% vs previous period",
+    "avgPrep": "Average time to ready",
+    "avgPrepHelp": "From order entered to marked ready",
+    "avgPickup": "Average pickup wait",
+    "avgPickupHelp": "From ready to collected",
+    "phoneLinked": "Phone linked",
+    "phoneLinkedHelp": "Share of orders where the customer's phone linked",
+    "cancelled": "Cancelled",
+    "cancelledHelp": "Orders cancelled by the cashier",
+    "minutes": "{value} min",
+    "avgMinutes": "{value} min on average",
+    "peakHour": "Peak hour",
+    "busiestDay": "Busiest day",
+    "slowestHour": "Slowest hour to prepare",
+    "avgPerDay": "Average per day",
+    "perDay": "orders per day",
+    "ordersCount": "{count} orders",
+    "byHour": "Orders by hour of the day",
+    "byDay": "Orders by day",
+    "hoverHint": "Hover over a bar to see its numbers.",
+    "readout": "{when} · {orders}",
+    "showTable": "Show as table",
+    "hour": "Hour",
+    "day": "Day"
+  },
+  "site": {
+    "nav": {
+      "how": "How it works",
+      "demo": "Live demo",
+      "pricing": "Pricing",
+      "faq": "FAQ",
+      "login": "Log in",
+      "start": "Start free"
+    },
+    "hero": {
+      "eyebrow": "Digital pager for restaurants and cafes",
+      "title": "Replace buzzers with your customers' phones.",
+      "subtitle": "Customers scan a QR code at the counter and follow their order on their own phone. When it's ready, the phone plays a sound and turns green. No hardware, no app.",
+      "primary": "Start your free month",
+      "secondary": "Try the live demo",
+      "note": "{price} JD per month · first month free",
+      "phoneShop": "Demo Cafe",
+      "phoneReady": "Your order is ready!",
+      "phoneCollect": "Please collect it from the counter."
+    },
+    "how": {
+      "title": "How it works",
+      "steps": [
+        {
+          "title": "Enter the order",
+          "text": "The cashier types the order number, or the app picks the next one automatically."
+        },
+        {
+          "title": "Customer scans the QR",
+          "text": "One QR code at the counter links the customer's phone to their order. Nothing to install."
+        },
+        {
+          "title": "The phone says: ready",
+          "text": "Tap Ready on the cashier screen and the customer's phone plays a sound and turns green."
+        }
+      ]
+    },
+    "demo": {
+      "title": "Try it yourself",
+      "subtitle": "This is a working preview of the two screens. Follow the steps below.",
+      "step1": "Cashier: tap “New order”",
+      "step2": "Customer: scan the QR",
+      "step3": "Cashier: tap “Ready”",
+      "step4": "The phone alerts. Tap “Collected”",
+      "cashier": "Cashier screen",
+      "phone": "Customer's phone",
+      "shop": "Demo Cafe",
+      "newOrder": "New order",
+      "ready": "Ready",
+      "collected": "Collected",
+      "preparing": "Preparing",
+      "readyLabel": "Ready",
+      "emptyCashier": "No orders yet. Tap “New order”.",
+      "scan": "Scan the QR code",
+      "scanHint": "Waiting for the cashier to enter an order.",
+      "scanReady": "The cashier entered your order.",
+      "orderPreparing": "Your order is being prepared…",
+      "orderReady": "Your order is ready!",
+      "collect": "Please collect it from the counter.",
+      "thanks": "Thank you! Order collected.",
+      "again": "Start again",
+      "orderNumber": "Order {number}"
+    },
+    "features": {
+      "title": "Everything a busy counter needs",
+      "items": [
+        {
+          "title": "No hardware to buy",
+          "text": "No buzzers to charge, lose or replace."
+        },
+        {
+          "title": "Works on any phone",
+          "text": "Customers just scan with the camera. There is nothing to download."
+        },
+        {
+          "title": "Arabic and English",
+          "text": "The whole experience, for customers and staff, in both languages."
+        },
+        {
+          "title": "Several branches",
+          "text": "One account with as many branches as you need, each with its own QR code and cashier link."
+        },
+        {
+          "title": "Daily statistics",
+          "text": "Peak hours, average preparation time, busiest days: see what happens at your counter."
+        },
+        {
+          "title": "Printable QR posters",
+          "text": "Choose a size and a design, then print or download."
+        }
+      ]
+    },
+    "pricing": {
+      "title": "Simple pricing",
+      "subtitle": "One plan with everything included. Choose how you want to pay.",
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "perMonth": "JD / month",
+      "perYear": "JD / year",
+      "freeMonth": "First month free",
+      "save": "Save {saving} JD",
+      "includes": [
+        "Unlimited orders",
+        "Several branches",
+        "Statistics dashboard",
+        "QR posters",
+        "Arabic and English",
+        "Support on WhatsApp"
+      ],
+      "cta": "Start free",
+      "fine": "Online payment is coming soon. Until then we arrange payment with you on WhatsApp."
+    },
+    "faq": {
+      "title": "Questions",
+      "items": [
+        {
+          "q": "Do customers need to install an app?",
+          "a": "No. They scan the QR code with the phone camera and a web page opens showing their order."
+        },
+        {
+          "q": "What if the phone is locked?",
+          "a": "Today the customer keeps the page open: the phone plays a sound, vibrates and the screen turns green when the order is ready. We are working on alerts that reach a locked screen."
+        },
+        {
+          "q": "Do cashiers need an account?",
+          "a": "No. Each branch has a secret link that the cashier opens on any device. You can replace it at any time."
+        },
+        {
+          "q": "How much does it cost?",
+          "a": "{monthly} JD per month with the first month free, or {yearly} JD per year."
+        },
+        {
+          "q": "Can I use it for several branches?",
+          "a": "Yes. One account holds several branches, each with its own QR code and statistics."
+        },
+        {
+          "q": "Can the order numbers match my invoices?",
+          "a": "Yes. The cashier can type an invoice number and the app continues counting from it."
+        }
+      ]
+    },
+    "contact": {
+      "title": "Talk to us",
+      "subtitle": "Questions, a demo for your shop, or help getting started? Message us on WhatsApp.",
+      "button": "Chat on WhatsApp",
+      "message": "Hello! I'd like to know more about the digital pager."
+    },
+    "footer": {
+      "rights": "All rights reserved."
+    }
+  },
+  "errors": {
+    "NUMBER_IN_USE": "Number #{number} is already in use by another order.",
+    "ORDER_CHANGED": "The order was changed by someone else. Please try again.",
+    "REOPEN_NUMBER_TAKEN": "Number #{number} is now used by another order, so this one can't be reopened.",
+    "ONLY_PENDING_CANCEL": "Only pending orders can be cancelled.",
+    "INVALID_TRANSITION": "That change isn't allowed for this order.",
+    "ORDER_NOT_FOUND": "Order not found.",
+    "SHOP_NOT_FOUND": "Shop not found.",
+    "NOTHING_TO_CLAIM": "No order is waiting. Ask the cashier to enter your order first.",
+    "NO_OPEN_ORDER": "There is no open order #{number}.",
+    "ALREADY_CLAIMED": "Order #{number} is already linked to another phone. Ask the cashier for your QR.",
+    "ALREADY_COLLECTED": "This order was already collected.",
+    "INVALID_EMAIL": "Please enter a valid email address.",
+    "WEAK_PASSWORD": "The password must be 8 to 128 characters.",
+    "EMAIL_TAKEN": "An account with this email already exists.",
+    "INVALID_CREDENTIALS": "Wrong email or password.",
+    "UNAUTHORIZED": "Please log in first.",
+    "INVALID_NAME": "Please enter a branch name (up to 60 characters).",
+    "TOO_MANY_BRANCHES": "You reached the maximum number of branches.",
+    "SLUG_UNAVAILABLE": "Could not create the branch address. Please try again.",
+    "BRANCH_NOT_FOUND": "Branch not found.",
+    "generic": "That didn't work. Please try again.",
+    "offline": "No connection. Please check your internet and try again."
+  }
+}

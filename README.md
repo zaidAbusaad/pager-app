@@ -94,7 +94,7 @@ Deleting the latest pending order gives its number back.
 
 Cashier undo: **Undo** on a Ready order moves it back to Pending, **Undo** on a
 Collected order reopens it as Ready (refused if its number is already used by
-a newer open order). **Delete** (two taps) removes a Pending order only.
+a newer open order). **Cancel** (two taps) cancels a Pending order only; it stays in the database as CANCELLED so statistics stay accurate.
 `DELETE /api/cashier/orders/:orderId` is the matching API call.
 
 Numbers: no two unfinished orders in a shop share a number, but a number can be
@@ -103,6 +103,31 @@ reused once its order is collected. The automatic counter skips taken numbers.
 Errors: 401 bad/missing secret, 400 invalid input, 404 unknown order (also for
 other shops' orders), 409 number already in use, forbidden status change or
 concurrent edit.
+
+## Languages (Arabic / English)
+
+- Every page lives under `/ar/...` or `/en/...`; Arabic (right-to-left) is the default.
+- `src/proxy.ts` redirects neutral URLs (`/s/<slug>`, `/c/<token>`, `/o/<token>`) to the right language using the saved choice, then the browser language.
+- All texts are in `messages/ar.json` and `messages/en.json`. A test (`src/i18n/messages.test.ts`) fails if a key is missing in one language.
+- API errors carry a stable `reason`; the screen translates it, so the server never sends user-facing text.
+- Adding a language: add it to `src/i18n/routing.ts` and create `messages/<code>.json`.
+- After pulling this change run `npm install` (adds `next-intl`).
+
+## Owner accounts and branches
+
+- Owners sign up at `/ar/signup` or `/en/signup` (email + password), log in at `/login`, and manage branches at `/account`.
+- One owner can have many branches. Each branch has a customer link (`/s/<slug>`, printed as the counter QR) and a secret cashier link (`/c/<token>`).
+- The cashier link is shown once, when the branch is created or when the owner makes a new one (the old link stops working at once). Only its hash is stored.
+- Passwords are stored with scrypt; login sessions are a random secret in an httpOnly cookie (30 days), stored hashed.
+- API: `POST /api/owner/auth/{register,login,logout}`, `GET /api/owner/me`, `GET|POST /api/owner/shops`, `POST /api/owner/shops/:shopId/cashier-link`.
+- After pulling: `npm install` and `npx prisma migrate dev`.
+
+## Dashboard
+
+- `/account/dashboard`: orders, average time to ready, average pickup wait, % of orders where a phone linked, cancelled orders, peak hour, busiest day, slowest hour, orders per hour and per day. Ranges: today, last 7 days, last 30 days; all branches or one.
+- Times use the shop's local clock (`Asia/Amman`, set in `src/domain/stats.ts`), so "13:00" means 13:00 in Jordan.
+- The maths is in `src/domain/stats.ts` (pure functions with tests). `GET /api/owner/stats?range=7d&shopId=...` returns the numbers.
+- Cancelled orders are kept in the database (status `CANCELLED`) and counted separately.
 
 ## Code layout
 

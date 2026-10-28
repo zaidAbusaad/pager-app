@@ -16,6 +16,8 @@ enum OrderStatus {
   PREPARING
   READY
   DONE
+  // A pending order the cashier cancelled. Kept (not deleted) for statistics.
+  CANCELLED
 }
 
 model Shop {
@@ -30,8 +32,40 @@ model Shop {
   // the secret itself, so a leaked database does not leak working links.
   cashierTokenHash String? @unique
 
+  // The owner (paying customer) this branch belongs to. Optional so the demo
+  // shop and shops created before accounts existed keep working.
+  ownerId String?
+  owner   Owner?  @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+
   createdAt DateTime @default(now())
   orders    Order[]
+
+  @@index([ownerId])
+}
+
+// A shop owner who logs in on the website. One owner, many shops (branches).
+model Owner {
+  id    String @id @default(cuid())
+  // Stored lowercase and trimmed, so one address is one account.
+  email String @unique
+  // scrypt hash (see src/domain/password.ts). Never the password itself.
+  passwordHash String
+
+  createdAt DateTime       @default(now())
+  shops     Shop[]
+  sessions  OwnerSession[]
+}
+
+// One row per logged-in browser. Only the hash of the cookie's secret is kept.
+model OwnerSession {
+  id        String   @id @default(cuid())
+  ownerId   String
+  owner     Owner    @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([ownerId])
 }
 
 model Order {

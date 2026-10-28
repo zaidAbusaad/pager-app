@@ -8,6 +8,7 @@ const STATUS_BY_CODE: Record<DomainErrorCode, number> = {
   UNAUTHORIZED: 401,
   NOTHING_TO_CLAIM: 404,
   ALREADY_CLAIMED: 409,
+  INVALID_INPUT: 400,
 };
 
 // Reads a JSON body, but treats an empty body as {} (so "no options" works).
@@ -23,6 +24,11 @@ export async function handle(run: () => Promise<Response>): Promise<Response> {
   try {
     return await run();
   } catch (error) {
+    // Next.js signals "this needs request data" or "redirect" by throwing
+    // special errors (their digest starts with NEXT_). They are not failures;
+    // let Next.js see them instead of turning them into a 500.
+    const digest = (error as { digest?: unknown } | null)?.digest;
+    if (typeof digest === "string" && digest.startsWith("NEXT_")) throw error;
     if (error instanceof ZodError) {
       return Response.json(
         { error: "VALIDATION_ERROR", issues: error.issues },
@@ -35,7 +41,12 @@ export async function handle(run: () => Promise<Response>): Promise<Response> {
     }
     if (error instanceof DomainError) {
       return Response.json(
-        { error: error.code, message: error.message },
+        {
+          error: error.code,
+          reason: error.reason,
+          message: error.message,
+          number: error.number,
+        },
         { status: STATUS_BY_CODE[error.code] },
       );
     }

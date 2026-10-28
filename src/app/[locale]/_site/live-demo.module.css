@@ -1,0 +1,236 @@
+/* Uses the tokens set by .site (see site.module.css). */
+.demo {
+  display: grid;
+  gap: 24px;
+}
+
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+@media (min-width: 900px) {
+  .steps {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+.steps li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: var(--card);
+  color: var(--label-2);
+  font-size: 0.9375rem;
+  border: 1px solid var(--separator);
+}
+.steps li[data-state="current"] {
+  color: var(--label);
+  font-weight: 600;
+  border-color: var(--primary);
+}
+.steps li[data-state="done"] {
+  opacity: 0.6;
+}
+.stepDot {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--fill);
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+.steps li[data-state="current"] .stepDot {
+  background: var(--primary);
+  color: var(--primary-ink);
+}
+
+.stage {
+  display: grid;
+  gap: 20px;
+  align-items: start;
+}
+@media (min-width: 900px) {
+  .stage {
+    grid-template-columns: 1.3fr 0.7fr;
+  }
+}
+
+/* cashier */
+.cashier {
+  background: var(--card);
+  border: 1px solid var(--separator);
+  border-radius: 24px;
+  padding: 20px;
+  min-height: 340px;
+}
+.cashierBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.cashierBar h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+.empty {
+  color: var(--label-2);
+  text-align: center;
+  padding: 48px 0;
+  margin: 0;
+}
+.rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: var(--fill);
+}
+.rowNumber {
+  font-size: 1.5rem;
+  font-weight: 800;
+  min-width: 3.2ch;
+}
+.rowStatus[data-status="PREPARING"] {
+  color: var(--orange);
+  font-weight: 600;
+}
+.rowStatus[data-status="READY"] {
+  color: var(--green);
+  font-weight: 600;
+}
+
+.primary,
+.quiet {
+  min-height: 44px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.primary {
+  background: var(--primary);
+  color: var(--primary-ink);
+}
+.quiet {
+  background: var(--fill);
+  color: var(--label);
+}
+.primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.primary:focus-visible,
+.quiet:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--primary) 65%, transparent);
+  outline-offset: 2px;
+}
+/* a soft ring tells the visitor which button to press next */
+.primary[data-pulse="true"] {
+  animation: pulse 1.6s ease-out infinite;
+}
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 55%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 14px transparent;
+  }
+}
+
+/* phone */
+.phone {
+  justify-self: center;
+  width: min(300px, 100%);
+  border-radius: 40px;
+  padding: 10px;
+  background: #1c1c1e;
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.22);
+}
+.screen {
+  min-height: 420px;
+  border-radius: 31px;
+  background: var(--bg);
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 14px;
+  text-align: center;
+  padding: 24px 18px;
+  transition: background 0.3s;
+}
+.screen[data-state="ready"] {
+  background: var(--green-bg);
+  color: var(--green);
+  animation: ready 1.2s ease-in-out infinite alternate;
+}
+@keyframes ready {
+  to {
+    filter: brightness(1.12);
+  }
+}
+.shop {
+  margin: 0;
+  font-weight: 600;
+  color: var(--label-2);
+}
+.number {
+  margin: 0;
+  font-size: 4.5rem;
+  font-weight: 800;
+  line-height: 1;
+}
+.status {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+.screen[data-state="preparing"] .status {
+  color: var(--orange);
+}
+.big {
+  margin: 0;
+  font-size: 1.375rem;
+  font-weight: 700;
+}
+.hint {
+  margin: 0;
+  color: var(--label-2);
+  font-size: 0.9375rem;
+}
+/* a drawn QR look-alike (not a real code) */
+.qr {
+  width: 120px;
+  height: 120px;
+  border-radius: 12px;
+  background:
+    conic-gradient(from 90deg at 50% 50%, var(--label) 25%, transparent 0 50%, var(--label) 0 75%, transparent 0) 0 0 / 24px 24px,
+    var(--bg);
+  border: 6px solid var(--label);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primary[data-pulse="true"],
+  .screen[data-state="ready"] {
+    animation: none;
+  }
+}

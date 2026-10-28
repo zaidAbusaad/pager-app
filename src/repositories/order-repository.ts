@@ -58,9 +58,11 @@ export interface OrderRepository {
   // taken the same number in the meantime.
   reopenDone(id: string, patch: StatusPatch): Promise<ReopenResult>;
 
-  // Deletes a PENDING (PREPARING) order. Returns false if it is missing or no
-  // longer pending. Gives its number back if it was the latest one issued.
-  deletePreparing(id: string): Promise<boolean>;
+  // Cancels a PENDING (PREPARING) order: it stays in the database as
+  // CANCELLED (for statistics) but frees its number. Returns false if it is
+  // missing or no longer pending. Gives the number back to the counter if it
+  // was the latest one issued.
+  cancelPreparing(id: string): Promise<boolean>;
 
   // Counter QR: atomically links the shop's NEWEST unfinished, unclaimed order
   // created at or after `since`. Two phones can never get the same order.

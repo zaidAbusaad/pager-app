@@ -1,0 +1,635 @@
+/* =====================================================================
+   Cashier screen. Visual language borrowed from Apple's Human Interface
+   Guidelines: system colours, the San Francisco type stack, a frosted
+   header, inset grouped lists, capsule buttons, a segmented control.
+   ===================================================================== */
+
+/* ---------- design tokens ---------- */
+.page {
+  --bg: #f2f2f7;
+  --card: #ffffff;
+  --label: #1c1c1e;
+  --label-2: #5f5f64;
+  --label-3: #aeaeb2;
+  --separator: rgba(60, 60, 67, 0.18);
+  --fill: rgba(118, 118, 128, 0.12);
+  --glass: rgba(242, 242, 247, 0.72);
+  --segment-thumb: #ffffff;
+
+  --primary: #0071e3;
+  --primary-ink: #ffffff;
+
+  --orange: #ff9500;
+  --green: #34c759;
+  --gray: #8e8e93;
+
+  --live-ok: #1d7f3a;
+  --live-warn: #a84700;
+  --live-bad: #d70015;
+
+  --danger-solid: #c4231c;
+  --toast-bg: rgba(28, 28, 30, 0.9);
+  --toast-ink: #ffffff;
+
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    "SF Pro Display", var(--font-geist-sans, system-ui), var(--font-arabic, system-ui), "Segoe UI",
+    system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--label);
+}
+
+@media (prefers-color-scheme: dark) {
+  .page {
+    --bg: #000000;
+    --card: #1c1c1e;
+    --label: #ffffff;
+    --label-2: #aeaeb2;
+    --label-3: #636366;
+    --separator: rgba(84, 84, 88, 0.65);
+    --fill: rgba(118, 118, 128, 0.24);
+    --glass: rgba(0, 0, 0, 0.62);
+    --segment-thumb: #636366;
+
+    --orange: #ff9f0a;
+    --green: #30d158;
+    --gray: #98989d;
+
+    --live-ok: #30d158;
+    --live-warn: #ff9f0a;
+    --live-bad: #ff6961;
+
+    --toast-bg: rgba(72, 72, 74, 0.92);
+  }
+}
+
+/* ---------- frosted header ---------- */
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--glass);
+  -webkit-backdrop-filter: saturate(180%) blur(22px);
+  backdrop-filter: saturate(180%) blur(22px);
+  border-bottom: 1px solid var(--separator);
+}
+
+.barInner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 12px 16px;
+  display: grid;
+  /* minmax(0, 1fr) lets the column shrink below its content's natural width;
+     a plain auto column would stretch to fit the input's default size. */
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+}
+
+.barTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.title {
+  font-size: 1.375rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.barRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.live {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--live-ok);
+}
+
+.live[data-state="offline"] {
+  color: var(--live-warn);
+}
+
+.live[data-state="invalid"] {
+  color: var(--live-bad);
+}
+
+.liveDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.live[data-state="ok"] .liveDot {
+  animation: breathe 2.4s ease-in-out infinite;
+}
+
+/* ---------- new-order form ---------- */
+.create {
+  display: flex;
+  gap: 8px;
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 12px;
+  background: var(--fill);
+  color: var(--label);
+  font: inherit;
+  font-size: 1.0625rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.input::placeholder {
+  color: var(--label-2);
+}
+
+/* ---------- buttons (capsules, 44px touch targets) ---------- */
+.pillPrimary,
+.pillQuiet {
+  min-height: 44px;
+  padding: 0 20px;
+  border: none;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    transform 0.12s ease,
+    opacity 0.12s ease;
+}
+
+.pillPrimary {
+  background: var(--primary);
+  color: var(--primary-ink);
+}
+
+.pillQuiet {
+  background: var(--fill);
+  color: var(--label);
+}
+
+/* destructive action: red text, solid red once armed by the first tap */
+.pillDanger {
+  composes: pillQuiet;
+  color: var(--live-bad);
+}
+
+.pillDanger[data-armed="true"] {
+  background: var(--danger-solid);
+  color: #ffffff;
+}
+
+.pillPrimary:active,
+.pillQuiet:active {
+  transform: scale(0.96);
+  opacity: 0.85;
+}
+
+.pillPrimary:disabled,
+.pillQuiet:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.input:focus-visible,
+.segment:focus-visible,
+.pillPrimary:focus-visible,
+.pillDanger:focus-visible,
+.pillQuiet:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--primary) 65%, transparent);
+  outline-offset: 2px;
+}
+
+/* ---------- content area ---------- */
+.content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px 16px 96px;
+}
+
+.notice {
+  padding: 16px;
+  border-radius: 14px;
+  background: var(--card);
+  color: var(--live-bad);
+  font-weight: 500;
+}
+
+/* ---------- segmented control (phones) ---------- */
+.segments {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  background: var(--fill);
+}
+
+.segment {
+  flex: 1;
+  min-height: 40px;
+  padding: 0 6px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--label);
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.15s ease;
+}
+
+.segment[aria-pressed="true"] {
+  background: var(--segment-thumb);
+  font-weight: 600;
+  box-shadow:
+    0 3px 8px rgba(0, 0, 0, 0.12),
+    0 3px 1px rgba(0, 0, 0, 0.04);
+}
+
+.segmentCount {
+  font-size: 0.8125rem;
+  color: var(--label-2);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- columns ---------- */
+.columns {
+  display: block;
+}
+
+.column {
+  display: none; /* phones: only the selected stage is shown */
+}
+
+.column[data-active="true"] {
+  display: block;
+}
+
+.column[data-tone="pending"] {
+  --tone: var(--orange);
+}
+
+.column[data-tone="ready"] {
+  --tone: var(--green);
+}
+
+.column[data-tone="done"] {
+  --tone: var(--gray);
+}
+
+.columnTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 4px 10px;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.toneDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--tone);
+}
+
+.columnCount {
+  margin-inline-start: auto;
+  min-width: 26px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: var(--fill);
+  color: var(--label-2);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* inset grouped list: one rounded container, hairlines between rows */
+.group {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-radius: 14px;
+  background: var(--card);
+  overflow: hidden;
+}
+
+.row {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap; /* on very narrow phones the buttons drop below the number */
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 80px;
+  padding: 14px 16px;
+  animation: rowIn 0.22s ease-out;
+}
+
+.row + .row::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  inset-inline: 16px 0;
+  height: 1px;
+  background: var(--separator);
+}
+
+/* the memorable part: big, tight, tabular numerals */
+.number {
+  font-size: 2.125rem;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.hash {
+  margin-inline-end: 1px;
+  color: var(--label-3);
+  font-weight: 600;
+}
+
+.caption {
+  margin-top: 6px;
+  font-size: 0.8125rem;
+  color: var(--label-2);
+}
+
+.actions {
+  margin-inline-start: auto;
+  display: flex;
+  gap: 8px;
+}
+
+.empty {
+  padding: 36px 16px;
+  border-radius: 14px;
+  background: var(--card);
+  text-align: center;
+}
+
+.emptyTitle {
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+
+.emptyHint {
+  margin-top: 4px;
+  font-size: 0.875rem;
+  color: var(--label-2);
+}
+
+/* ---------- toast ---------- */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: max(24px, env(safe-area-inset-bottom));
+  z-index: 20;
+  max-width: calc(100vw - 32px);
+  padding: 12px 20px;
+  border-radius: 999px;
+  background: var(--toast-bg);
+  color: var(--toast-ink);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  transform: translateX(-50%);
+  animation: toastIn 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+.toast[data-kind="error"] {
+  background: var(--danger-solid);
+}
+
+/* ---------- wide screens: all three stages side by side ---------- */
+@media (min-width: 900px) {
+  .barInner {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    padding: 14px 24px;
+  }
+
+  .title {
+    font-size: 1.625rem;
+  }
+
+  .input {
+    flex: 0 0 180px;
+  }
+
+  .content {
+    padding: 28px 24px 96px;
+  }
+
+  .segments {
+    display: none;
+  }
+
+  .columns {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+    align-items: start;
+  }
+
+  .column {
+    display: block;
+  }
+}
+
+/* ---------- motion ---------- */
+@keyframes rowIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 12px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* People who asked their device for less motion get none. */
+@media (prefers-reduced-motion: reduce) {
+  .row,
+  .toast,
+  .live[data-state="ok"] .liveDot {
+    animation: none;
+  }
+
+  .pillPrimary,
+  .pillQuiet,
+  .segment {
+    transition: none;
+  }
+}
+
+/* ---------- phone link badge + QR sheet ---------- */
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  min-height: 32px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--label-2);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.link {
+  white-space: nowrap;
+}
+
+.link svg {
+  flex-shrink: 0;
+}
+
+.link[data-linked="true"] {
+  color: var(--live-ok);
+}
+
+.link:focus-visible,
+.sheet:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--primary) 65%, transparent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.sheet {
+  width: min(92vw, 360px);
+  max-height: 92dvh;
+  margin: auto;
+  padding: 0;
+  border: none;
+  border-radius: 28px;
+  background: var(--card);
+  color: var(--label);
+  overflow: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.sheet::backdrop {
+  background: rgba(0, 0, 0, 0.45);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+.sheetBody {
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+  padding: 24px 20px 20px;
+  text-align: center;
+}
+
+.sheetTitle {
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.sheetHint {
+  font-size: 0.9375rem;
+  color: var(--label-2);
+}
+
+/* the QR is always black on white, in dark mode too, so cameras read it */
+.qrBox {
+  width: min(100%, 260px);
+  aspect-ratio: 1;
+  border-radius: 18px;
+  background: #ffffff;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+
+.qr {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.qrWait {
+  color: #5f5f64;
+  font-size: 0.875rem;
+}
+
+.sheetStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--label-2);
+}
+
+.sheetStatus[data-linked="true"] {
+  color: var(--live-ok);
+}
+
+.sheetActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}

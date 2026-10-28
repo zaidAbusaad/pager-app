@@ -22,7 +22,9 @@ export function createCustomerService({
 }: Dependencies) {
   async function requireShopBySlug(slug: string): Promise<Shop> {
     const shop = await shops.findBySlug(slug);
-    if (!shop) throw new DomainError("NOT_FOUND", "Shop not found");
+    if (!shop) throw new DomainError("NOT_FOUND", "Shop not found", {
+      reason: "SHOP_NOT_FOUND",
+    });
     return shop;
   }
 
@@ -62,11 +64,13 @@ export function createCustomerService({
           throw new DomainError(
             "NOT_FOUND",
             `There is no open order #${number}.`,
+            { reason: "NO_OPEN_ORDER", number },
           );
         case "already_claimed":
           throw new DomainError(
             "ALREADY_CLAIMED",
             `Order #${number} is already linked to another phone. Ask the cashier for your QR.`,
+            { number },
           );
       }
     },
@@ -77,9 +81,13 @@ export function createCustomerService({
       claimToken: string,
     ): Promise<{ order: Order; shop: Shop }> {
       let order = await orders.findByClaimToken(claimToken);
-      if (!order) throw new DomainError("NOT_FOUND", "Order not found");
+      if (!order) throw new DomainError("NOT_FOUND", "Order not found", {
+        reason: "ORDER_NOT_FOUND",
+      });
       const shop = await shops.findById(order.shopId);
-      if (!shop) throw new DomainError("NOT_FOUND", "Order not found");
+      if (!shop) throw new DomainError("NOT_FOUND", "Order not found", {
+        reason: "ORDER_NOT_FOUND",
+      });
 
       if (order.claimedAt === null) {
         const at = now();
@@ -94,9 +102,18 @@ export function createCustomerService({
     // secret, so this phone's link dies, and the right customer can claim it.
     async release(claimToken: string): Promise<void> {
       const order = await orders.findByClaimToken(claimToken);
-      if (!order) throw new DomainError("NOT_FOUND", "Order not found");
+      if (!order) throw new DomainError("NOT_FOUND", "Order not found", {
+        reason: "ORDER_NOT_FOUND",
+      });
+      if (order.status === "CANCELLED") {
+        throw new DomainError("NOT_FOUND", "Order not found", {
+          reason: "ORDER_NOT_FOUND",
+        });
+      }
       if (order.status === "DONE") {
-        throw new DomainError("CONFLICT", "This order was already collected.");
+        throw new DomainError("CONFLICT", "This order was already collected.", {
+          reason: "ALREADY_COLLECTED",
+        });
       }
       await orders.resetClaim(order.shopId, order.id, generateClaimToken());
     },

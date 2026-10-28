@@ -1,0 +1,296 @@
+.root {
+  /* chart colours: one blue, the tallest bar gets the stronger step */
+  --bar: #5598e7;
+  --bar-peak: #1c5cab;
+  --grid: rgba(60, 60, 67, 0.14);
+  display: grid;
+  gap: 20px;
+  max-width: 1100px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .root {
+    --bar: #256abf;
+    --bar-peak: #6da7ec;
+    --grid: rgba(84, 84, 88, 0.5);
+  }
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.muted,
+.help,
+.label {
+  color: var(--label-2);
+}
+
+.error {
+  color: var(--danger);
+}
+
+.empty {
+  padding: 32px 20px;
+  border-radius: 20px;
+  background: var(--card);
+  color: var(--label-2);
+  text-align: center;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.segments {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--card);
+}
+
+.segments button {
+  appearance: none;
+  border: 0;
+  border-radius: 999px;
+  min-height: 38px;
+  padding: 0 16px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  background: none;
+  color: var(--label-2);
+  cursor: pointer;
+}
+
+.segments button[aria-pressed="true"] {
+  background: var(--primary);
+  color: var(--primary-ink);
+}
+
+.branchPick select {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--label);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ---- headline number + small tiles ---- */
+.top {
+  display: grid;
+  gap: 16px;
+}
+
+@media (min-width: 900px) {
+  .top {
+    grid-template-columns: 280px minmax(0, 1fr);
+  }
+}
+
+.hero,
+.tile,
+.insight,
+.card {
+  background: var(--card);
+  border-radius: 20px;
+  padding: 18px 20px;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.heroNumber {
+  font-size: 64px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  margin-top: 6px;
+}
+
+.delta {
+  margin-top: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--label-2);
+  min-height: 1.2em;
+}
+
+.delta[data-up="true"] {
+  color: var(--green);
+}
+
+.tiles {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 1100px) {
+  .tiles {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.tileValue {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-top: 4px;
+}
+
+.help {
+  font-size: 12px;
+  margin-top: 4px;
+  line-height: 1.35;
+}
+
+/* ---- insight cards ---- */
+.insights {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.insightValue {
+  font-size: 22px;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+/* ---- charts ---- */
+.cardTitle {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.chart {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.readout {
+  min-height: 1.4em;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.plot {
+  position: relative;
+  padding-inline-start: 28px;
+}
+
+.axisMax {
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0;
+  font-size: 11px;
+  color: var(--label-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.columns {
+  display: flex;
+  gap: 2px;
+  height: 200px;
+  border-block-end: 1px solid var(--grid);
+  /* one recessive gridline at the top (the maximum) */
+  background: linear-gradient(var(--grid), var(--grid)) top / 100% 1px no-repeat;
+  padding-block-end: 22px;
+  position: relative;
+}
+
+.slot {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  justify-content: center;
+  outline: none;
+}
+
+.slot:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+  border-radius: 4px;
+}
+
+.barArea {
+  width: 100%;
+  max-width: 24px;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+}
+
+.bar {
+  width: 100%;
+  min-height: 0;
+  background: var(--bar);
+  border-radius: 4px 4px 0 0;
+}
+
+.bar[data-peak="true"] {
+  background: var(--bar-peak);
+}
+
+.slot:hover .bar {
+  filter: brightness(1.1);
+}
+
+.tick {
+  position: absolute;
+  top: calc(100% + 4px);
+  font-size: 10px;
+  color: var(--label-2);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- table view ---- */
+.details {
+  margin-top: 12px;
+  font-size: 14px;
+}
+
+.details summary {
+  cursor: pointer;
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.table {
+  margin-top: 8px;
+  border-collapse: collapse;
+  width: 100%;
+  max-width: 320px;
+}
+
+.table th,
+.table td {
+  text-align: start;
+  padding: 6px 8px;
+  border-block-end: 1px solid var(--grid);
+  font-variant-numeric: tabular-nums;
+}

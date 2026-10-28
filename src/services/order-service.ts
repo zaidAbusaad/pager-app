@@ -37,11 +37,14 @@ export function createOrderService({
         case "created":
           return result.order;
         case "shop_not_found":
-          throw new DomainError("NOT_FOUND", "Shop not found");
+          throw new DomainError("NOT_FOUND", "Shop not found", {
+            reason: "SHOP_NOT_FOUND",
+          });
         case "number_taken":
           throw new DomainError(
             "CONFLICT",
             `Number #${requestedNumber} is already in use by another order`,
+            { reason: "NUMBER_IN_USE", number: requestedNumber },
           );
       }
     },
@@ -51,24 +54,29 @@ export function createOrderService({
       return orders.peekNextNumber(shopId);
     },
 
-    // Deletes a PENDING order (created by mistake). Collected or ready orders
-    // are never deleted, so the day's record stays honest.
-    async deleteOrder(shopId: string, orderId: string): Promise<void> {
+    // Cancels a PENDING order (created by mistake). The order is kept as
+    // CANCELLED so statistics stay honest; ready or collected orders cannot be
+    // cancelled.
+    async cancelOrder(shopId: string, orderId: string): Promise<void> {
       const current = await orders.findById(orderId);
       if (!current || current.shopId !== shopId) {
-        throw new DomainError("NOT_FOUND", "Order not found");
+        throw new DomainError("NOT_FOUND", "Order not found", {
+        reason: "ORDER_NOT_FOUND",
+      });
       }
       if (current.status !== "PREPARING") {
         throw new DomainError(
           "INVALID_TRANSITION",
-          "Only pending orders can be deleted.",
+          "Only pending orders can be cancelled.",
+          { reason: "ONLY_PENDING_CANCEL" },
         );
       }
-      const deleted = await orders.deletePreparing(orderId);
-      if (!deleted) {
+      const cancelled = await orders.cancelPreparing(orderId);
+      if (!cancelled) {
         throw new DomainError(
           "CONFLICT",
           "The order was changed by someone else. Please retry.",
+          { reason: "ORDER_CHANGED" },
         );
       }
     },
@@ -92,7 +100,9 @@ export function createOrderService({
         orderId,
         generateClaimToken(),
       );
-      if (!order) throw new DomainError("NOT_FOUND", "Order not found");
+      if (!order) throw new DomainError("NOT_FOUND", "Order not found", {
+        reason: "ORDER_NOT_FOUND",
+      });
       return order;
     },
 
@@ -107,7 +117,9 @@ export function createOrderService({
       // An order from another shop looks exactly like a missing one,
       // so a cashier can never discover or touch other shops' orders.
       if (!current || current.shopId !== shopId) {
-        throw new DomainError("NOT_FOUND", "Order not found");
+        throw new DomainError("NOT_FOUND", "Order not found", {
+        reason: "ORDER_NOT_FOUND",
+      });
       }
 
       // Idempotent: a double-tap is not an error, nothing changes.
@@ -125,11 +137,13 @@ export function createOrderService({
             throw new DomainError(
               "CONFLICT",
               `Number #${current.number} is now used by another order, so this one cannot be reopened.`,
+              { reason: "REOPEN_NUMBER_TAKEN", number: current.number },
             );
           case "not_done":
             throw new DomainError(
               "CONFLICT",
               "The order was changed by someone else. Please retry.",
+              { reason: "ORDER_CHANGED" },
             );
         }
       }
@@ -144,6 +158,7 @@ export function createOrderService({
         throw new DomainError(
           "CONFLICT",
           "The order was changed by someone else. Please retry.",
+          { reason: "ORDER_CHANGED" },
         );
       }
       return updated;

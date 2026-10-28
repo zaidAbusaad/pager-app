@@ -1,0 +1,211 @@
+/* Owner screens reuse the customer look (same tokens, card, buttons). */
+.page {
+  composes: page from "../(customer)/customer.module.css";
+}
+.lang {
+  composes: lang from "../(customer)/customer.module.css";
+}
+.card {
+  composes: card from "../(customer)/customer.module.css";
+}
+.title {
+  composes: title from "../(customer)/customer.module.css";
+}
+.hint {
+  composes: hint from "../(customer)/customer.module.css";
+}
+.button {
+  composes: button from "../(customer)/customer.module.css";
+}
+.quiet {
+  composes: quiet from "../(customer)/customer.module.css";
+}
+.error {
+  composes: error from "../(customer)/customer.module.css";
+}
+
+.form {
+  display: grid;
+  gap: 14px;
+  text-align: start;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--label-2);
+}
+
+.input {
+  width: 100%;
+  min-height: 52px;
+  border: 0;
+  border-radius: 14px;
+  padding: 0 16px;
+  background: var(--bg);
+  color: var(--label);
+  font: inherit;
+  font-size: 17px;
+}
+
+/* emails and passwords are typed left-to-right in both languages */
+.ltr {
+  direction: ltr;
+  text-align: start;
+}
+
+.input:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.fieldHint {
+  font-size: 13px;
+  color: var(--label-2);
+}
+
+.switch {
+  font-size: 15px;
+  color: var(--label-2);
+}
+
+.link {
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* ---- account page ---- */
+.wide {
+  width: min(100%, 560px);
+  text-align: start;
+}
+
+.section {
+  font-size: 18px;
+  font-weight: 700;
+  margin-top: 8px;
+}
+
+.branches {
+  list-style: none;
+  display: grid;
+  gap: 14px;
+}
+
+.branch {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 18px;
+  background: var(--bg);
+}
+
+.branchName {
+  font-size: 17px;
+  font-weight: 650;
+}
+
+.copyRow {
+  display: flex;
+  gap: 8px;
+}
+
+.copyInput {
+  min-width: 0;
+  font-size: 14px;
+  background: var(--card);
+}
+
+.small {
+  appearance: none;
+  border: 0;
+  border-radius: 999px;
+  min-height: 44px;
+  padding: 0 16px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  background: var(--primary);
+  color: var(--primary-ink);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.warn {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--orange);
+}
+
+.rowBetween {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+/* two-option switch: QR | Link */
+.toggle {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 999px;
+  background: var(--card);
+}
+
+.toggle button {
+  appearance: none;
+  border: 0;
+  border-radius: 999px;
+  min-height: 32px;
+  padding: 0 14px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  background: none;
+  color: var(--label-2);
+  cursor: pointer;
+}
+
+.toggle button[aria-pressed="true"] {
+  background: var(--primary);
+  color: var(--primary-ink);
+}
+
+.qrArea {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+}
+
+/* always white behind the code, even in dark mode, so it scans */
+.qr {
+  width: 200px;
+  height: 200px;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+a.small {
+  display: inline-grid;
+  place-items: center;
+  text-decoration: none;
+}
+
+a.small[aria-disabled="true"] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.posterLink {
+  justify-self: start;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--primary);
+  text-decoration: none;
+}

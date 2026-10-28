@@ -22,6 +22,7 @@ export async function PATCH(
 }
 
 // DELETE /api/cashier/orders/:orderId   (pending orders only)
+// Cancels the order: it is kept (as CANCELLED) for statistics, not erased.
 export async function DELETE(
   request: NextRequest,
   ctx: RouteContext<"/api/cashier/orders/[orderId]">,
@@ -29,7 +30,7 @@ export async function DELETE(
   return handle(async () => {
     const shop = await requireCashier(request);
     const { orderId } = orderParams.parse(await ctx.params);
-    await orderService.deleteOrder(shop.id, orderId);
+    await orderService.cancelOrder(shop.id, orderId);
     return new Response(null, { status: 204 });
   });
 }

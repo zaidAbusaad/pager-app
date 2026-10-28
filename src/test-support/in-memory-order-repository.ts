@@ -1,4 +1,4 @@
-import type { Order, OrderStatus, StatusPatch } from "@/domain/order";
+import { isActive, type Order, type OrderStatus, type StatusPatch } from "@/domain/order";
 import type {
   ClaimByNumberResult,
   CreateOrderInput,
@@ -22,7 +22,7 @@ export class InMemoryOrderRepository implements OrderRepository {
 
   private isTaken(shopId: string, number: number) {
     return [...this.orders.values()].some(
-      (o) => o.shopId === shopId && o.number === number && o.status !== "DONE",
+      (o) => o.shopId === shopId && o.number === number && isActive(o.status),
     );
   }
 
@@ -77,7 +77,7 @@ export class InMemoryOrderRepository implements OrderRepository {
 
   async listActiveByShop(shopId: string): Promise<Order[]> {
     return [...this.orders.values()]
-      .filter((o) => o.shopId === shopId && o.status !== "DONE")
+      .filter((o) => o.shopId === shopId && isActive(o.status))
       .sort((a, b) => a.number - b.number);
   }
 
@@ -110,10 +110,10 @@ export class InMemoryOrderRepository implements OrderRepository {
     return { kind: "reopened", order: updated };
   }
 
-  async deletePreparing(id: string): Promise<boolean> {
+  async cancelPreparing(id: string): Promise<boolean> {
     const order = this.orders.get(id);
     if (!order || order.status !== "PREPARING") return false;
-    this.orders.delete(id);
+    this.orders.set(id, { ...order, status: "CANCELLED" });
     if (this.counters.get(order.shopId) === order.number) {
       this.counters.set(order.shopId, order.number - 1);
     }
@@ -133,7 +133,7 @@ export class InMemoryOrderRepository implements OrderRepository {
       (o) =>
         o.shopId === shopId &&
         o.claimedAt === null &&
-        o.status !== "DONE" &&
+        isActive(o.status) &&
         o.createdAt >= since,
     );
     if (!candidate) return null;
@@ -148,7 +148,7 @@ export class InMemoryOrderRepository implements OrderRepository {
     now: Date,
   ): Promise<ClaimByNumberResult> {
     const candidate = [...this.orders.values()].find(
-      (o) => o.shopId === shopId && o.number === number && o.status !== "DONE",
+      (o) => o.shopId === shopId && o.number === number && isActive(o.status),
     );
     if (!candidate) return { kind: "not_found" };
     if (candidate.claimedAt) return { kind: "already_claimed" };

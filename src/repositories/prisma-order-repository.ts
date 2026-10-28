@@ -1,4 +1,4 @@
-import type { Order, OrderStatus, StatusPatch } from "@/domain/order";
+import { ACTIVE_STATUSES, type Order, type OrderStatus, type StatusPatch } from "@/domain/order";
 import { getPrisma } from "@/lib/db";
 import type {
   ClaimByNumberResult,
@@ -8,7 +8,7 @@ import type {
   ReopenResult,
 } from "./order-repository";
 
-const ACTIVE_STATUSES: OrderStatus[] = ["PREPARING", "READY"];
+const ACTIVE: OrderStatus[] = [...ACTIVE_STATUSES];
 
 export class PrismaOrderRepository implements OrderRepository {
   async createForShop({
@@ -28,7 +28,7 @@ export class PrismaOrderRepository implements OrderRepository {
 
       const isTaken = async (number: number) =>
         (await tx.order.findFirst({
-          where: { shopId, number, status: { in: ACTIVE_STATUSES } },
+          where: { shopId, number, status: { in: ACTIVE } },
           select: { id: true },
         })) !== null;
 
@@ -72,7 +72,7 @@ export class PrismaOrderRepository implements OrderRepository {
     // same skipping rule as creation: never suggest a number in use
     while (
       (await prisma.order.findFirst({
-        where: { shopId, number, status: { in: ACTIVE_STATUSES } },
+        where: { shopId, number, status: { in: ACTIVE } },
         select: { id: true },
       })) !== null
     ) {
@@ -91,7 +91,7 @@ export class PrismaOrderRepository implements OrderRepository {
 
   listActiveByShop(shopId: string): Promise<Order[]> {
     return getPrisma().order.findMany({
-      where: { shopId, status: { in: ACTIVE_STATUSES } },
+      where: { shopId, status: { in: ACTIVE } },
       orderBy: { number: "asc" },
     });
   }
@@ -135,7 +135,7 @@ export class PrismaOrderRepository implements OrderRepository {
         where: {
           shopId: order.shopId,
           number: order.number,
-          status: { in: ACTIVE_STATUSES },
+          status: { in: ACTIVE },
           NOT: { id },
         },
         select: { id: true },
@@ -154,7 +154,7 @@ export class PrismaOrderRepository implements OrderRepository {
     });
   }
 
-  async deletePreparing(id: string): Promise<boolean> {
+  async cancelPreparing(id: string): Promise<boolean> {
     return getPrisma().$transaction(async (tx) => {
       const order = await tx.order.findUnique({
         where: { id },
@@ -165,8 +165,9 @@ export class PrismaOrderRepository implements OrderRepository {
       await tx.$queryRaw`
         SELECT "id" FROM "Shop" WHERE "id" = ${order.shopId} FOR UPDATE
       `;
-      const result = await tx.order.deleteMany({
+      const result = await tx.order.updateMany({
         where: { id, status: "PREPARING" },
+        data: { status: "CANCELLED" },
       });
       if (result.count === 0) return false;
 
@@ -194,7 +195,7 @@ export class PrismaOrderRepository implements OrderRepository {
         where: {
           shopId,
           claimedAt: null,
-          status: { in: ACTIVE_STATUSES },
+          status: { in: ACTIVE },
           createdAt: { gte: since },
         },
         orderBy: [{ createdAt: "desc" }, { id: "desc" }],
@@ -220,7 +221,7 @@ export class PrismaOrderRepository implements OrderRepository {
   ): Promise<ClaimByNumberResult> {
     const prisma = getPrisma();
     const candidate = await prisma.order.findFirst({
-      where: { shopId, number, status: { in: ACTIVE_STATUSES } },
+      where: { shopId, number, status: { in: ACTIVE } },
       orderBy: { createdAt: "desc" },
       select: { id: true },
     });

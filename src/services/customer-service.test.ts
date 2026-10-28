@@ -244,4 +244,27 @@ describe("customer service", () => {
       expect(order.number).toBe(27);
     });
   });
+
+  describe("error reasons (translated by the screens)", () => {
+    it("distinguishes a missing shop from a missing order", async () => {
+      await expect(customer.getShop("nope")).rejects.toMatchObject({
+        reason: "SHOP_NOT_FOUND",
+      });
+      await expect(
+        customer.getOrderStatus("not-a-real-token-123"),
+      ).rejects.toMatchObject({ reason: "ORDER_NOT_FOUND" });
+    });
+
+    it("carries the typed number for NO_OPEN_ORDER and ALREADY_CLAIMED", async () => {
+      await expect(
+        customer.claimByNumber("demo-cafe", 99),
+      ).rejects.toMatchObject({ reason: "NO_OPEN_ORDER", number: 99 });
+
+      await cashier.createOrder("shop-1", 27);
+      await customer.claimLatest("demo-cafe");
+      await expect(
+        customer.claimByNumber("demo-cafe", 27),
+      ).rejects.toMatchObject({ reason: "ALREADY_CLAIMED", number: 27 });
+    });
+  });
 });

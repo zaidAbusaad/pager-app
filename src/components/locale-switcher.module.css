@@ -1,0 +1,18 @@
+/* Colours come from the page that contains the button (with fallbacks). */
+.switcher {
+  min-height: 36px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 999px;
+  background: var(--fill, rgba(118, 118, 128, 0.12));
+  color: var(--label, #1c1c1e);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.switcher:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--primary, #0071e3) 65%, transparent);
+  outline-offset: 2px;
+}
