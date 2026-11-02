@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { Link } from "@/i18n/navigation";
@@ -10,14 +11,14 @@ export async function SiteHeader() {
     <header className={styles.header}>
       <div className={`${styles.container} ${styles.headerInner}`}>
         <Link href="/" className={styles.brand}>
-          <span className={styles.brandMark} aria-hidden />
+          <Image src="/brand/icon-96.png" alt="" width={32} height={32} className={styles.brandMark} />
           {common("brand")}
         </Link>
         <nav className={styles.links} aria-label="Main">
-          <a href="#how">{t("how")}</a>
-          <a href="#demo">{t("demo")}</a>
-          <a href="#pricing">{t("pricing")}</a>
-          <a href="#faq">{t("faq")}</a>
+          <Link href="/#how">{t("how")}</Link>
+          <Link href="/#demo">{t("demo")}</Link>
+          <Link href="/#pricing">{t("pricing")}</Link>
+          <Link href="/#faq">{t("faq")}</Link>
         </nav>
         <div className={styles.headerActions}>
           <LocaleSwitcher />

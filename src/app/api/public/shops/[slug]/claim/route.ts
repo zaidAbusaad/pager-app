@@ -1,7 +1,9 @@
 import type { NextRequest } from "next/server";
 import { handle, readOptionalJson } from "@/lib/http";
 import { toPublicOrderDto } from "@/lib/order-dto";
-import { customerService } from "@/server/container";
+import { RATE_POLICIES } from "@/domain/rate-limit";
+import { clientIp } from "@/lib/client-ip";
+import { customerService, rateLimiter } from "@/server/container";
 import { claimBody } from "@/validation/order-schemas";
 import { slugParams } from "@/validation/shop-schemas";
 
@@ -15,6 +17,7 @@ export async function POST(
 ) {
   return handle(async () => {
     const { slug } = slugParams.parse(await ctx.params);
+    await rateLimiter.consume(RATE_POLICIES.claim, `${clientIp(request.headers)}:${slug}`);
     const { number } = claimBody.parse(await readOptionalJson(request));
     const { order, shop } =
       number === undefined

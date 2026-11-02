@@ -96,3 +96,12 @@ model Order {
   @@index([shopId, number])
   @@index([shopId, status])
 }
+
+// Counts requests per key inside a time window, so the server can refuse
+// callers that ask too often (password guessing, scripted claims).
+// Rows expire by themselves and are cleaned up now and then.
+model RateLimit {
+  key         String @id
+  count       Int
+  resetsAtMs  BigInt
+}

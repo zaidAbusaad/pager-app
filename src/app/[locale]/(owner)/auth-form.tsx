@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { useState, type FormEvent } from "react";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { Link, useRouter } from "@/i18n/navigation";
+import { whatsappLink } from "@/domain/plans";
 import { useApiErrorMessage, useOfflineMessage } from "@/lib/use-api-error";
 import styles from "./owner.module.css";
 
@@ -88,6 +89,33 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
             {busy ? t("working") : t(signup ? "signupButton" : "loginButton")}
           </button>
         </form>
+        {signup ? (
+          <p className={styles.fieldHint}>
+            {t.rich("agree", {
+              terms: (chunks) => (
+                <Link className={styles.link} href="/terms">
+                  {chunks}
+                </Link>
+              ),
+              privacy: (chunks) => (
+                <Link className={styles.link} href="/privacy">
+                  {chunks}
+                </Link>
+              ),
+            })}
+          </p>
+        ) : (
+          <p className={styles.fieldHint}>
+            <a
+              className={styles.link}
+              href={whatsappLink(`${t("forgotMessage")} ${email}`.trim())}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {t("forgot")}
+            </a>
+          </p>
+        )}
         <p className={styles.switch}>
           {t(signup ? "haveAccount" : "noAccount")}{" "}
           <Link className={styles.link} href={signup ? "/login" : "/signup"}>

@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 import { handle } from "@/lib/http";
-import { customerService } from "@/server/container";
+import { RATE_POLICIES } from "@/domain/rate-limit";
+import { customerService, rateLimiter } from "@/server/container";
 import { tokenParams } from "@/validation/order-schemas";
 
 // POST /api/public/orders/:token/release   ("Not my order")
@@ -10,6 +11,7 @@ export async function POST(
 ) {
   return handle(async () => {
     const { token } = tokenParams.parse(await ctx.params);
+    await rateLimiter.consume(RATE_POLICIES.release, token);
     await customerService.release(token);
     return new Response(null, { status: 204 });
   });

@@ -81,6 +81,7 @@ describe("translations", () => {
       "TOO_MANY_BRANCHES",
       "SLUG_UNAVAILABLE",
       "BRANCH_NOT_FOUND",
+      "RATE_LIMITED",
       "generic",
       "offline",
     ];

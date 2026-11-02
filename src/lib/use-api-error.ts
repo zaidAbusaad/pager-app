@@ -56,6 +56,8 @@ export function useApiErrorMessage() {
         return t("SLUG_UNAVAILABLE");
       case "BRANCH_NOT_FOUND":
         return t("BRANCH_NOT_FOUND");
+      case "RATE_LIMITED":
+        return t("RATE_LIMITED");
       default:
         return t("generic");
     }

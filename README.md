@@ -1,4 +1,4 @@
-# pager-app
+# Pagerly
 
 QR-code pager for restaurants and cafes: the customer scans a code and their
 phone alerts them when the order is ready, instead of a hardware buzzer.
@@ -21,6 +21,16 @@ string into `.env` as `DATABASE_URL`.
 
 After you change `prisma/schema.prisma`: run `npm run db:migrate`, then
 `npm run db:generate` (Prisma 7 no longer regenerates the client by itself).
+
+## Brand
+
+Logos live in `public/brand/` (wordmark, 96 px icon). The favicon, app icon
+and social-share image are `src/app/favicon.ico`, `icon.png`, `apple-icon.png`
+and `opengraph-image.png`; Next.js picks them up by file name.
+
+## Deploying
+
+See [docs/DEPLOY.md](docs/DEPLOY.md) (Vercel + Neon + your domain).
 
 ## Scripts
 

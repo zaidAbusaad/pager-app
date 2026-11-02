@@ -1,7 +1,8 @@
 import type { NextRequest } from "next/server";
 import { handle } from "@/lib/http";
 import { toPublicOrderDto } from "@/lib/order-dto";
-import { customerService } from "@/server/container";
+import { RATE_POLICIES } from "@/domain/rate-limit";
+import { customerService, rateLimiter } from "@/server/container";
 import { tokenParams } from "@/validation/order-schemas";
 
 // GET /api/public/orders/:token  ->  the customer's number and live status.
@@ -12,6 +13,7 @@ export async function GET(
 ) {
   return handle(async () => {
     const { token } = tokenParams.parse(await ctx.params);
+    await rateLimiter.consume(RATE_POLICIES.orderStatus, token);
     const { order, shop } = await customerService.getOrderStatus(token);
     return Response.json(toPublicOrderDto(order, shop), {
       headers: { "Cache-Control": "no-store" },

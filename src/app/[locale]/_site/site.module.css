@@ -73,10 +73,9 @@
   text-decoration: none;
 }
 .brandMark {
-  width: 22px;
-  height: 22px;
-  border-radius: 7px;
-  background: var(--primary);
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
 }
 .links {
   display: none;
@@ -425,4 +424,39 @@
 }
 .footer p {
   margin: 0;
+}
+
+/* legal pages */
+.h1 {
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+  letter-spacing: -0.015em;
+  margin: 12px 0 8px;
+}
+.legal {
+  padding: 40px 0 72px;
+}
+.legalBack {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+}
+.legalH2 {
+  font-size: 1.125rem;
+  margin: 32px 0 8px;
+}
+.legalP {
+  line-height: 1.75;
+  color: var(--label);
+  margin: 0 0 10px;
+}
+.footerLinks {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-bottom: 10px;
+}
+.footerLinks a {
+  color: var(--label-2);
+  text-decoration: underline;
 }

@@ -9,6 +9,7 @@ const STATUS_BY_CODE: Record<DomainErrorCode, number> = {
   NOTHING_TO_CLAIM: 404,
   ALREADY_CLAIMED: 409,
   INVALID_INPUT: 400,
+  TOO_MANY_REQUESTS: 429,
 };
 
 // Reads a JSON body, but treats an empty body as {} (so "no options" works).
@@ -46,8 +47,16 @@ export async function handle(run: () => Promise<Response>): Promise<Response> {
           reason: error.reason,
           message: error.message,
           number: error.number,
+          retryAfterSeconds: error.retryAfterSeconds,
         },
-        { status: STATUS_BY_CODE[error.code] },
+        {
+          status: STATUS_BY_CODE[error.code],
+          // standard header that tells well-behaved clients when to retry
+          headers:
+            error.retryAfterSeconds === undefined
+              ? undefined
+              : { "Retry-After": String(error.retryAfterSeconds) },
+        },
       );
     }
     console.error(error);

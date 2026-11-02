@@ -9,6 +9,8 @@ import { createCustomerService } from "@/services/customer-service";
 import { createOrderService } from "@/services/order-service";
 import { createStatsService } from "@/services/stats-service";
 import { createOwnerAuthService } from "@/services/owner-auth-service";
+import { PrismaRateLimitStore } from "@/repositories/prisma-rate-limit-store";
+import { createRateLimiter } from "@/services/rate-limit-service";
 
 // The one place where real implementations are wired together.
 const orderRepository = new PrismaOrderRepository();
@@ -36,3 +38,5 @@ export const statsService = createStatsService({
   branches: ownerShops,
   stats: new PrismaStatsRepository(),
 });
+
+export const rateLimiter = createRateLimiter({ store: new PrismaRateLimitStore() });

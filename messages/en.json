@@ -2,7 +2,7 @@
   "common": {
     "loading": "Loading…",
     "switchTo": "العربية",
-    "brand": "Pager"
+    "brand": "Pagerly"
   },
   "meta": {
     "home": "Digital pager for restaurants and cafes",
@@ -13,7 +13,9 @@
     "signup": "Create an account",
     "account": "Your account",
     "poster": "QR poster",
-    "dashboard": "Dashboard"
+    "dashboard": "Dashboard",
+    "privacy": "Privacy policy",
+    "terms": "Terms of use"
   },
   "home": {
     "title": "Digital pager for restaurants and cafes",
@@ -127,7 +129,10 @@
     "noAccount": "New here?",
     "haveAccount": "Already have an account?",
     "signupLink": "Create an account",
-    "loginLink": "Log in"
+    "loginLink": "Log in",
+    "agree": "By creating an account you agree to the <terms>terms of use</terms> and the <privacy>privacy policy</privacy>.",
+    "forgot": "Forgot your password? Message us on WhatsApp.",
+    "forgotMessage": "Hello! I forgot my Pagerly password. My account email is:"
   },
   "account": {
     "title": "Your account",
@@ -376,10 +381,13 @@
       "message": "Hello! I'd like to know more about the digital pager."
     },
     "footer": {
-      "rights": "All rights reserved."
+      "rights": "All rights reserved.",
+      "privacy": "Privacy policy",
+      "terms": "Terms of use"
     }
   },
   "errors": {
+    "RATE_LIMITED": "Too many attempts. Please wait a few minutes and try again.",
     "NUMBER_IN_USE": "Number #{number} is already in use by another order.",
     "ORDER_CHANGED": "The order was changed by someone else. Please try again.",
     "REOPEN_NUMBER_TAKEN": "Number #{number} is now used by another order, so this one can't be reopened.",
@@ -402,5 +410,124 @@
     "BRANCH_NOT_FOUND": "Branch not found.",
     "generic": "That didn't work. Please try again.",
     "offline": "No connection. Please check your internet and try again."
+  },
+  "legal": {
+    "updated": "Last updated: November 2026",
+    "back": "Back to home",
+    "privacy": {
+      "title": "Privacy policy",
+      "sections": [
+        {
+          "title": "Who we are",
+          "paragraphs": [
+            "Pagerly is a digital pager for restaurants and cafes, run from Jordan. You can reach us on WhatsApp at 0799 016 101."
+          ]
+        },
+        {
+          "title": "What we collect",
+          "paragraphs": [
+            "Shop owners: your email address, your password (stored only as a one-way scrambled value, so we cannot read it) and the names of your branches.",
+            "Orders: the order number, its status and the times it was created, marked ready and collected. This is what powers your statistics.",
+            "Customers: we do not ask for a name, phone number or email. A customer's phone remembers its own order link in the browser so the page can continue after a refresh.",
+            "Technical: your IP address is used for a short time to stop abuse such as password guessing. These counters delete themselves within hours."
+          ]
+        },
+        {
+          "title": "How we use it",
+          "paragraphs": [
+            "To run the service, to show you your statistics, to protect the service from abuse, and to contact you about your account. We do not sell your data and we do not show advertising."
+          ]
+        },
+        {
+          "title": "Cookies and browser storage",
+          "paragraphs": [
+            "Owners get one cookie that keeps them logged in (up to 30 days). Customer pages store the order link in the browser. We do not use advertising or tracking cookies and we do not use third-party analytics."
+          ]
+        },
+        {
+          "title": "Who else handles data",
+          "paragraphs": [
+            "Our hosting and database providers store the data for us. WhatsApp handles the messages you send us there. We share data with nobody else unless the law requires it."
+          ]
+        },
+        {
+          "title": "How long we keep it",
+          "paragraphs": [
+            "Account, branch and order data is kept while your account is active so that your statistics work. Ask us and we delete your account and its data."
+          ]
+        },
+        {
+          "title": "Your choices",
+          "paragraphs": [
+            "You can ask us on WhatsApp to show, correct or delete the data we hold about you."
+          ]
+        },
+        {
+          "title": "Changes",
+          "paragraphs": [
+            "If this policy changes, we update the date at the top of this page."
+          ]
+        }
+      ]
+    },
+    "terms": {
+      "title": "Terms of use",
+      "sections": [
+        {
+          "title": "The service",
+          "paragraphs": [
+            "Pagerly lets a shop tell its customers, on their own phone, when an order is ready. By creating an account you agree to these terms and to the privacy policy."
+          ]
+        },
+        {
+          "title": "Your account",
+          "paragraphs": [
+            "Give us a correct email address and keep your password and your cashier links secret. Anyone who has a branch's cashier link can use that branch's cashier screen. You are responsible for what happens under your account."
+          ]
+        },
+        {
+          "title": "Free month and prices",
+          "paragraphs": [
+            "The first month is free. After that the price is {monthly} JD per month, or {yearly} JD per year. For now we arrange payment with you on WhatsApp. You can stop at any time, and we tell you before any price changes."
+          ]
+        },
+        {
+          "title": "Alerts are best effort",
+          "paragraphs": [
+            "An alert depends on the customer's phone, its connection, its sound and vibration settings, and on the order page being open. We cannot promise that every customer is alerted, so keep another way to call out ready orders."
+          ]
+        },
+        {
+          "title": "Acceptable use",
+          "paragraphs": [
+            "Do not attack the service, try to guess other people's links or passwords, copy it automatically in bulk, or use it for anything illegal."
+          ]
+        },
+        {
+          "title": "Availability",
+          "paragraphs": [
+            "We work to keep the service running but we cannot promise it will never be interrupted."
+          ]
+        },
+        {
+          "title": "Liability",
+          "paragraphs": [
+            "As far as the law allows, we are not responsible for lost sales or other indirect losses caused by an outage or a missed alert. Our total responsibility is limited to the amount you paid us in the last 12 months."
+          ]
+        },
+        {
+          "title": "Ending",
+          "paragraphs": [
+            "You can stop using the service at any time. We may suspend an account that breaks these terms."
+          ]
+        },
+        {
+          "title": "Changes and law",
+          "paragraphs": [
+            "We may update these terms and will change the date above when we do. Using the service after a change means you accept it. The laws of Jordan apply."
+          ]
+        }
+      ]
+    }
   }
 }

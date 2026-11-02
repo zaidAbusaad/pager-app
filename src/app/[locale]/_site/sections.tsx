@@ -205,6 +205,10 @@ export async function SiteFooter() {
   return (
     <footer className={styles.footer}>
       <div className={styles.container}>
+        <nav className={styles.footerLinks}>
+          <Link href="/privacy">{t("privacy")}</Link>
+          <Link href="/terms">{t("terms")}</Link>
+        </nav>
         <p>
           © {common("brand")}. {t("rights")}
         </p>

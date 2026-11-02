@@ -14,6 +14,25 @@ const nextConfig: NextConfig = {
   // the dev server. Without this Next blocks their scripts and the page looks
   // frozen. Each * stands for one number, so these cover home Wi-Fi addresses.
   allowedDevOrigins: ["192.168.*.*", "10.*.*.*"],
+
+  // Basic safety headers on every response.
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          // browsers must not guess file types
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          // nobody can embed our pages in a frame (stops click-jacking)
+          { key: "X-Frame-Options", value: "DENY" },
+          // do not leak private link paths (/o/<secret>) to other sites
+          { key: "Referrer-Policy", value: "no-referrer" },
+          // we use none of these browser features
+          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+        ],
+      },
+    ];
+  },
 };
 
 export default withNextIntl(nextConfig);
