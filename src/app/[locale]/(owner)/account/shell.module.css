@@ -204,3 +204,52 @@
     padding: 0;
   }
 }
+
+/* ---- subscription banner (pending / ending soon / ended) ---- */
+.banner {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--card);
+  border: 1px solid var(--separator);
+  border-inline-start: 5px solid var(--orange);
+}
+
+.banner[data-tone="danger"] {
+  border-inline-start-color: var(--danger);
+}
+
+.bannerTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.bannerText {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--label-2);
+}
+
+.bannerButton {
+  justify-self: start;
+  display: inline-grid;
+  place-items: center;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: var(--primary-ink);
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+@media print {
+  .banner {
+    display: none;
+  }
+}

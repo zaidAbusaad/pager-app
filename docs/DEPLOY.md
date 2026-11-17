@@ -6,22 +6,32 @@ Everything below is done once. Takes about 30 minutes.
 
 1. Create an account at neon.tech and a project. Pick the region closest to
    Jordan (for example Frankfurt).
-2. Copy the **connection string** (it ends with `?sslmode=require`).
-3. Keep it secret: it is the password to all your data.
+2. Copy **two** connection strings from the Connect dialog (both end with
+   `?sslmode=require`):
+   - the **pooled** one: the host contains `-pooler` (the "Connection pooling"
+     switch is on). The running app uses it.
+   - the **direct** one: no `-pooler` in the host (switch off). Only database
+     migrations use it.
+3. Keep both secret: they are the password to all your data.
+4. Before the first real shop, move the project to a paid plan (no auto-sleep,
+   backups). The free plan is fine for your own testing.
 
 ## 2. Hosting (Vercel)
 
 1. Push the repository to GitHub (private repo is fine).
 2. At vercel.com choose **Add New > Project** and import the repository.
 3. Under **Environment Variables** add:
-   - `DATABASE_URL` = the Neon connection string
+   - `DATABASE_URL` = the Neon **pooled** connection string
+   - `DIRECT_URL` = the Neon **direct** connection string
 4. Deploy. The script `vercel-build` runs `prisma migrate deploy` first, so the
    tables are created automatically on every deploy, then `next build`.
 
-If the build fails with a database error, check that `DATABASE_URL` is set for
-the **Production** environment and that the string is the direct (not
-"pooled") one: migrations need a direct connection. Neon shows both; the
-direct one has no `-pooler` in the host name.
+If the build fails with a database error, check that both variables are set
+for the **Production** environment, and that `DIRECT_URL` is the string
+*without* `-pooler`: migrations need a direct connection.
+
+Note: Vercel's free Hobby plan is for non-commercial use only. A paid product
+needs the Pro plan.
 
 ## 3. Your domain (pagerlyjo.app)
 
@@ -38,6 +48,34 @@ direct one has no `-pooler` in the host name.
   and Android.
 - Add `https://pagerlyjo.app/api/health` to a free uptime monitor
   (UptimeRobot, Better Stack) so you get a message when the site is down.
+
+## Managing accounts (activation and renewals)
+
+New owners can sign up, but their account stays **pending** until you activate
+it: the cashier screen refuses to work. Payment is arranged on WhatsApp, then
+you run one command on your own PC (there is no admin web page).
+
+```powershell
+npm run admin -- list                          # every account and its status
+npm run admin -- activate owner@cafe.jo 1      # +1 month (first activation too)
+npm run admin -- activate owner@cafe.jo 12     # a yearly payment
+npm run admin -- deactivate owner@cafe.jo      # stop the cashier right now
+```
+
+Renewing adds to the current end date, so paying early loses no days. When an
+account ends there is a 3-day grace period, then the cashier screen stops.
+Nothing is ever deleted: the owner can still log in and see their data, and it
+all works again after the next `activate`.
+
+The command changes whichever database `.env` points to, and prints it first.
+For the real (Neon) database, set the direct string for this one PowerShell
+window only, then remove it:
+
+```powershell
+$env:DIRECT_URL = "<paste the Neon DIRECT string>"
+npm run admin -- list
+Remove-Item Env:DIRECT_URL
+```
 
 ## 5. Backups
 

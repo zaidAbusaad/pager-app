@@ -4,7 +4,9 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
+import type { SubscriptionSummary } from "@/domain/subscription";
 import styles from "./shell.module.css";
+import { SubscriptionBanner } from "./subscription-banner";
 
 // The frame around every owner page: a side menu on laptops, a top bar on
 // phones. It also checks the login once for all pages inside it.
@@ -15,12 +17,17 @@ export function OwnerShell({ children }: { children: React.ReactNode }) {
   // Branches stays highlighted on its own page and on the poster page below it.
   const onBranches = pathname.startsWith("/account") && !pathname.startsWith("/account/dashboard");
   const [email, setEmail] = useState<string | null>(null);
+  const [subscription, setSubscription] = useState<SubscriptionSummary | null>(null);
 
   useEffect(() => {
     (async () => {
       const res = await fetch("/api/owner/me", { cache: "no-store" }).catch(() => null);
       if (res?.status === 401) return router.replace("/login");
-      if (res?.ok) setEmail(((await res.json()) as { email: string }).email);
+      if (res?.ok) {
+        const me = (await res.json()) as { email: string; subscription: SubscriptionSummary };
+        setEmail(me.email);
+        setSubscription(me.subscription);
+      }
     })();
   }, [router]);
 
@@ -70,7 +77,10 @@ export function OwnerShell({ children }: { children: React.ReactNode }) {
           and a page hidden behind "wait for the login check" would fail that
           check. Pages fetch their own data; if nobody is logged in, the check
           above redirects to the login page. */}
-      <div className={styles.content}>{children}</div>
+      <div className={styles.content}>
+        {email && subscription && <SubscriptionBanner summary={subscription} email={email} />}
+        {children}
+      </div>
     </div>
   );
 }

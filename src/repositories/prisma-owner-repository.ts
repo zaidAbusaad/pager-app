@@ -13,7 +13,7 @@ export class PrismaOwnerRepository implements OwnerRepository {
     try {
       const owner = await getPrisma().owner.create({
         data: input,
-        select: { id: true, email: true },
+        select: { id: true, email: true, activeUntil: true },
       });
       return { kind: "created", owner };
     } catch (error) {
@@ -28,7 +28,7 @@ export class PrismaOwnerRepository implements OwnerRepository {
   findByEmail(email: string): Promise<OwnerWithPassword | null> {
     return getPrisma().owner.findUnique({
       where: { email },
-      select: { id: true, email: true, passwordHash: true },
+      select: { id: true, email: true, activeUntil: true, passwordHash: true },
     });
   }
 }
@@ -41,7 +41,10 @@ export class PrismaSessionRepository implements SessionRepository {
   async findOwnerByTokenHash(tokenHash: string, now: Date): Promise<Owner | null> {
     const session = await getPrisma().ownerSession.findUnique({
       where: { tokenHash },
-      select: { expiresAt: true, owner: { select: { id: true, email: true } } },
+      select: {
+        expiresAt: true,
+        owner: { select: { id: true, email: true, activeUntil: true } },
+      },
     });
     if (!session || session.expiresAt <= now) return null;
     return session.owner;

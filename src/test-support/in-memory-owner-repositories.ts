@@ -13,9 +13,12 @@ export class InMemoryOwnerRepository implements OwnerRepository {
 
   async create(input: { email: string; passwordHash: string }): Promise<CreateOwnerResult> {
     if (this.owners.has(input.email)) return { kind: "email_taken" };
-    const owner = { id: `owner-${++this.sequence}`, ...input };
+    const owner = { id: `owner-${++this.sequence}`, ...input, activeUntil: null };
     this.owners.set(input.email, owner);
-    return { kind: "created", owner: { id: owner.id, email: owner.email } };
+    return {
+      kind: "created",
+      owner: { id: owner.id, email: owner.email, activeUntil: owner.activeUntil },
+    };
   }
 
   async findByEmail(email: string) {
@@ -39,7 +42,9 @@ export class InMemorySessionRepository implements SessionRepository {
     const session = this.sessions.get(tokenHash);
     if (!session || session.expiresAt <= now) return null;
     const owner = [...this.owners.owners.values()].find((o) => o.id === session.ownerId);
-    return owner ? { id: owner.id, email: owner.email } : null;
+    return owner
+      ? { id: owner.id, email: owner.email, activeUntil: owner.activeUntil }
+      : null;
   }
 
   async deleteByTokenHash(tokenHash: string) {

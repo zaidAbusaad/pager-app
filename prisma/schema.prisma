@@ -51,6 +51,11 @@ model Owner {
   // scrypt hash (see src/domain/password.ts). Never the password itself.
   passwordHash String
 
+  // Until when the owner has paid (see src/domain/subscription.ts). Empty =
+  // signed up but not activated yet. Past = expired. Nothing is deleted when
+  // it expires; renewing just moves this date forward.
+  activeUntil DateTime?
+
   createdAt DateTime       @default(now())
   shops     Shop[]
   sessions  OwnerSession[]

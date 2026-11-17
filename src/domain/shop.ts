@@ -4,6 +4,13 @@ export interface Shop {
   slug: string;
 }
 
+// A shop together with the subscription of the owner it belongs to. `owner`
+// is null for shops that have no owner (the demo shop): those are never
+// blocked.
+export interface ShopWithOwner extends Shop {
+  owner: { activeUntil: Date | null } | null;
+}
+
 export const MAX_SHOP_NAME_LENGTH = 60;
 // A safety cap, not a pricing rule: stops one account from creating
 // thousands of branches. Raise it per customer later if needed.

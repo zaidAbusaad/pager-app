@@ -1,4 +1,4 @@
-import type { Shop } from "@/domain/shop";
+import type { Shop, ShopWithOwner } from "@/domain/shop";
 import { getPrisma } from "@/lib/db";
 import type { ShopRepository } from "./shop-repository";
 
@@ -7,10 +7,10 @@ import type { ShopRepository } from "./shop-repository";
 const PUBLIC_FIELDS = { id: true, name: true, slug: true } as const;
 
 export class PrismaShopRepository implements ShopRepository {
-  findByCashierTokenHash(hash: string): Promise<Shop | null> {
+  findByCashierTokenHash(hash: string): Promise<ShopWithOwner | null> {
     return getPrisma().shop.findUnique({
       where: { cashierTokenHash: hash },
-      select: PUBLIC_FIELDS,
+      select: { ...PUBLIC_FIELDS, owner: { select: { activeUntil: true } } },
     });
   }
 

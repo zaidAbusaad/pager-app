@@ -4,6 +4,8 @@
 export interface Owner {
   id: string;
   email: string;
+  // Paid until this moment; null = not activated yet (src/domain/subscription.ts).
+  activeUntil: Date | null;
 }
 
 export const MIN_PASSWORD_LENGTH = 8;

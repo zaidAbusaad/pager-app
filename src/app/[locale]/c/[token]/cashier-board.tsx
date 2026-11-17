@@ -78,7 +78,7 @@ export function CashierBoard({ token }: { token: string }) {
   const apiError = useApiErrorMessage();
 
   const [board, setBoard] = useState<Board | null>(null);
-  const [problem, setProblem] = useState<"invalid" | "offline" | null>(null);
+  const [problem, setProblem] = useState<"invalid" | "offline" | "inactive" | null>(null);
   const [busy, setBusy] = useState(false);
   const [activeStage, setActiveStage] = useState<OrderStatus>("PREPARING");
   const [numberInput, setNumberInput] = useState("");
@@ -110,6 +110,12 @@ export function CashierBoard({ token }: { token: string }) {
       const res = await call("");
       if (res.status === 401) {
         setProblem("invalid");
+        return;
+      }
+      // 403 = the link is fine, but the owner's subscription is not active.
+      // We keep polling, so the screen comes back by itself after a renewal.
+      if (res.status === 403) {
+        setProblem("inactive");
         return;
       }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -191,6 +197,10 @@ export function CashierBoard({ token }: { token: string }) {
       if (res.ok) return null;
       if (res.status === 401) {
         setProblem("invalid");
+        return null;
+      }
+      if (res.status === 403) {
+        setProblem("inactive");
         return null;
       }
       if (res.status === 400) return t("toast.badNumberShort");
@@ -297,7 +307,7 @@ export function CashierBoard({ token }: { token: string }) {
             </div>
           </div>
 
-          {!stopped && (
+          {!stopped && problem !== "inactive" && (
             <form className={styles.create} onSubmit={createOrder}>
               <input
                 className={styles.input}
@@ -326,8 +336,10 @@ export function CashierBoard({ token }: { token: string }) {
       </header>
 
       <div className={styles.content}>
-        {stopped ? (
-          <p className={styles.notice}>{t("invalidLink")}</p>
+        {stopped || problem === "inactive" ? (
+          <p className={styles.notice}>
+            {problem === "inactive" ? t("inactiveNotice") : t("invalidLink")}
+          </p>
         ) : (
           <>
             {/* Phones show one stage at a time; wide screens hide this control. */}

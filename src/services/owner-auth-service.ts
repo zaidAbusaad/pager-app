@@ -72,7 +72,11 @@ export function createOwnerAuthService({ owners, sessions, now = () => new Date(
       dummyHash ??= hashPassword("not-a-real-password");
       const ok = await verifyPassword(input.password, found?.passwordHash ?? (await dummyHash));
       if (!found || !ok) throw deny();
-      return startSession({ id: found.id, email: found.email });
+      return startSession({
+        id: found.id,
+        email: found.email,
+        activeUntil: found.activeUntil,
+      });
     },
 
     // Turns the cookie's secret into the logged-in owner, or throws.

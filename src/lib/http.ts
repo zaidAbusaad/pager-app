@@ -10,6 +10,7 @@ const STATUS_BY_CODE: Record<DomainErrorCode, number> = {
   ALREADY_CLAIMED: 409,
   INVALID_INPUT: 400,
   TOO_MANY_REQUESTS: 429,
+  SUBSCRIPTION_INACTIVE: 403,
 };
 
 // Reads a JSON body, but treats an empty body as {} (so "no options" works).

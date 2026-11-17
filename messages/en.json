@@ -30,6 +30,7 @@
     "nextNumberValue": "Next: {number}",
     "numberAria": "Order number (optional)",
     "newOrder": "New order",
+    "inactiveNotice": "This shop's Pagerly subscription is not active. Ask the shop owner to renew it.",
     "invalidLink": "This cashier link is not valid. Ask the shop owner for a new one.",
     "showOrders": "Show orders",
     "stages": {
@@ -385,6 +386,19 @@
       "privacy": "Privacy policy",
       "terms": "Terms of use"
     }
+  },
+  "subscription": {
+    "pendingTitle": "Your account is waiting for activation",
+    "pendingText": "Message us on WhatsApp and we will activate it. You can set up your branches now, but the cashier screen stays off until your account is active.",
+    "soonTitle": "Your subscription ends on {date}",
+    "soonText": "Renew on WhatsApp so the cashier screen does not stop.",
+    "graceTitle": "Your subscription has ended",
+    "graceText": "The cashier screen keeps working until {date}. Renew on WhatsApp to avoid an interruption.",
+    "expiredTitle": "Your subscription has ended",
+    "expiredText": "The cashier screens are stopped. Your data is safe, and everything works again as soon as you renew.",
+    "button": "Chat on WhatsApp",
+    "waPending": "Hello! I created a Pagerly account with {email} and I would like to activate it.",
+    "waRenew": "Hello! I would like to renew my Pagerly subscription ({email})."
   },
   "errors": {
     "RATE_LIMITED": "Too many attempts. Please wait a few minutes and try again.",
