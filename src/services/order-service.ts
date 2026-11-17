@@ -91,6 +91,33 @@ export function createOrderService({
       return [...active, ...done];
     },
 
+    // Cashier "Ring again": forgets the customer's "I'm coming", so their phone
+    // starts ringing again. Only makes sense while the order is READY.
+    async ringAgain(shopId: string, orderId: string): Promise<Order> {
+      const current = await orders.findById(orderId);
+      if (!current || current.shopId !== shopId) {
+        throw new DomainError("NOT_FOUND", "Order not found", {
+          reason: "ORDER_NOT_FOUND",
+        });
+      }
+      if (current.status !== "READY") {
+        throw new DomainError(
+          "INVALID_TRANSITION",
+          "Only ready orders can be rung again.",
+          { reason: "ONLY_READY_RING" },
+        );
+      }
+      const order = await orders.ringAgain(shopId, orderId);
+      if (!order) {
+        throw new DomainError(
+          "CONFLICT",
+          "The order was changed by someone else. Please retry.",
+          { reason: "ORDER_CHANGED" },
+        );
+      }
+      return order;
+    },
+
     // Cashier "reset link": the order gets a new secret, so whoever held the
     // old link (a wrong person, a lost phone) is cut off, and the order can be
     // linked again by a new scan.

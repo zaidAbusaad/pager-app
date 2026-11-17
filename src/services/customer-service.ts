@@ -97,6 +97,28 @@ export function createCustomerService({
       return { order, shop };
     },
 
+    // "I'm coming": the customer saw the alert and is on the way. Their phone
+    // goes quiet and the cashier sees it. Tapping again is harmless. Only a
+    // READY order can be answered: before that there was no alert to answer.
+    async imComing(claimToken: string): Promise<{ order: Order; shop: Shop }> {
+      const found = await orders.findByClaimToken(claimToken);
+      if (!found) throw new DomainError("NOT_FOUND", "Order not found", {
+        reason: "ORDER_NOT_FOUND",
+      });
+      const shop = await shops.findById(found.shopId);
+      if (!shop) throw new DomainError("NOT_FOUND", "Order not found", {
+        reason: "ORDER_NOT_FOUND",
+      });
+      const notReady = () =>
+        new DomainError("CONFLICT", "This order is not ready yet.", {
+          reason: "NOT_READY",
+        });
+      if (found.status !== "READY") throw notReady();
+      const order = await orders.markComing(found.id, now());
+      if (!order) throw notReady(); // changed while we were asking
+      return { order, shop };
+    },
+
     // "Not my order": the customer's phone let go of an order it linked by
     // mistake (for example the person in front's order). The order gets a new
     // secret, so this phone's link dies, and the right customer can claim it.

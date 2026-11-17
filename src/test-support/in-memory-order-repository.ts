@@ -54,6 +54,7 @@ export class InMemoryOrderRepository implements OrderRepository {
       doneAt: null,
       claimToken,
       claimedAt: null,
+      comingAt: null,
     };
     this.orders.set(order.id, order);
     return { kind: "created", order };
@@ -162,6 +163,23 @@ export class InMemoryOrderRepository implements OrderRepository {
     if (order && order.claimedAt === null) {
       this.orders.set(orderId, { ...order, claimedAt: now });
     }
+  }
+
+  async markComing(orderId: string, now: Date): Promise<Order | null> {
+    const order = this.orders.get(orderId);
+    if (!order || order.status !== "READY") return null;
+    if (order.comingAt !== null) return order; // the first tap's time is kept
+    const updated = { ...order, comingAt: now };
+    this.orders.set(orderId, updated);
+    return updated;
+  }
+
+  async ringAgain(shopId: string, orderId: string): Promise<Order | null> {
+    const order = this.orders.get(orderId);
+    if (!order || order.shopId !== shopId || order.status !== "READY") return null;
+    const updated = { ...order, comingAt: null };
+    this.orders.set(orderId, updated);
+    return updated;
   }
 
   async resetClaim(

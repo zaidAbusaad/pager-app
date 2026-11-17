@@ -44,7 +44,7 @@ describe("statusPatch", () => {
   const now = new Date("2026-10-22T12:00:00Z");
 
   it("stamps readyAt when an order becomes READY", () => {
-    expect(statusPatch("READY", now)).toEqual({ readyAt: now, doneAt: null });
+    expect(statusPatch("READY", now)).toEqual({ readyAt: now, doneAt: null, comingAt: null });
   });
 
   it("stamps doneAt when an order becomes DONE", () => {
@@ -55,6 +55,7 @@ describe("statusPatch", () => {
     expect(statusPatch("PREPARING", now)).toEqual({
       readyAt: null,
       doneAt: null,
+      comingAt: null,
     });
   });
 });

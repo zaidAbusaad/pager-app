@@ -95,6 +95,11 @@ model Order {
   // The shop's counter QR only hands out orders where this is still null.
   claimedAt DateTime?
 
+  // Set when the customer taps "I'm coming" on a READY order: their phone goes
+  // quiet and the cashier sees "on the way". Cleared again by the cashier's
+  // "Ring again", and whenever the order is moved back to READY or PREPARING.
+  comingAt DateTime?
+
   // Not unique on purpose: a number can be reused once its earlier order is
   // DONE. "No two unfinished orders share a number" is enforced in code,
   // inside a transaction that locks the shop row.

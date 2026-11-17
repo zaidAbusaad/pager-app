@@ -633,3 +633,10 @@
   flex-wrap: wrap;
   justify-content: center;
 }
+
+.onTheWay {
+  margin-top: 6px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--live-ok);
+}

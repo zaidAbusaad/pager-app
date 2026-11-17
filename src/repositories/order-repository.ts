@@ -83,6 +83,15 @@ export interface OrderRepository {
   // Marks an order as linked if it is not already (keeps the first time).
   markClaimed(orderId: string, now: Date): Promise<void>;
 
+  // Customer "I'm coming": marks a READY order (the first time is kept).
+  // Returns the order, also when it was already marked; null when it is
+  // missing or not READY (not ready yet, collected, cancelled).
+  markComing(orderId: string, now: Date): Promise<Order | null>;
+
+  // Cashier "Ring again": clears "I'm coming" on a READY order of this shop.
+  // Null when the order is not in this shop or not READY.
+  ringAgain(shopId: string, orderId: string): Promise<Order | null>;
+
   // Cashier "reset": gives the order a NEW secret (the old link stops working
   // at once) and marks it unclaimed. Null if the order is not in this shop.
   resetClaim(

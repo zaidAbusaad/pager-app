@@ -14,6 +14,8 @@ export function toOrderDto(order: Order) {
     // The cashier may show this order's QR: /o/<claimToken>
     claimToken: order.claimToken,
     claimed: order.claimedAt !== null,
+    // the customer tapped "I'm coming"
+    coming: order.comingAt !== null,
   };
 }
 
@@ -28,6 +30,8 @@ export function toPublicOrderDto(
     number: order.number,
     status: order.status,
     readyAt: order.readyAt?.toISOString() ?? null,
+    // true once the customer tapped "I'm coming": the phone stays quiet
+    coming: order.comingAt !== null,
     shopName: shop.name,
     shopSlug: shop.slug,
   };

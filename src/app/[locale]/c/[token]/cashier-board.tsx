@@ -22,6 +22,7 @@ interface OrderDto {
   doneAt: string | null;
   claimToken: string; // secret of this order's customer link (/o/<claimToken>)
   claimed: boolean; // true once a phone is linked to the order
+  coming: boolean; // the customer tapped "I'm coming"
 }
 
 interface Board {
@@ -268,6 +269,11 @@ export function CashierBoard({ token }: { token: string }) {
     show(error ? "error" : "ok", error ?? t("toast.cancelled"));
   }
 
+  async function ringAgain(id: string) {
+    const error = await act(() => call(`/${id}/ring-again`, { method: "POST" }));
+    show(error ? "error" : "ok", error ?? t("toast.ringedAgain"));
+  }
+
   async function setStatus(id: string, status: OrderStatus) {
     const error = await act(() =>
       call(`/${id}`, { method: "PATCH", body: JSON.stringify({ status }) }),
@@ -411,6 +417,11 @@ export function CashierBoard({ token }: { token: string }) {
                                       : t("collected")}
                                   </div>
                                 )}
+                                {order.status === "READY" && order.coming && (
+                                  <div className={styles.onTheWay}>
+                                    {t("onTheWay")}
+                                  </div>
+                                )}
                                 {order.status !== "DONE" && (
                                   <button
                                     type="button"
@@ -466,6 +477,16 @@ export function CashierBoard({ token }: { token: string }) {
                               )}
                               {order.status === "READY" && (
                                 <span className={styles.actions}>
+                                  {order.coming && (
+                                    <button
+                                      className={styles.pillQuiet}
+                                      onClick={() => ringAgain(order.id)}
+                                      disabled={busy}
+                                      aria-label={t("ariaRingAgain", num)}
+                                    >
+                                      {t("ringAgain")}
+                                    </button>
+                                  )}
                                   <button
                                     className={styles.pillQuiet}
                                     onClick={() =>

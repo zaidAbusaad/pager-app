@@ -25,12 +25,14 @@ export interface Order {
   doneAt: Date | null;
   claimToken: string; // secret in the customer link (/o/<claimToken>)
   claimedAt: Date | null; // when a phone linked to this order, if any
+  comingAt: Date | null; // when the customer tapped "I'm coming" (cleared by "Ring again")
 }
 
 // The timestamps that change together with a status.
 export interface StatusPatch {
   readyAt?: Date | null;
   doneAt?: Date | null;
+  comingAt?: Date | null;
 }
 
 // Which status may follow which. This table IS the business rule.
@@ -63,11 +65,12 @@ export function assertCanTransition(from: OrderStatus, to: OrderStatus): void {
 export function statusPatch(to: OrderStatus, now: Date): StatusPatch {
   switch (to) {
     case "READY":
-      return { readyAt: now, doneAt: null };
+      // a fresh "ready" is a fresh alert: any earlier "I'm coming" is forgotten
+      return { readyAt: now, doneAt: null, comingAt: null };
     case "DONE":
       return { doneAt: now };
     case "PREPARING":
     case "CANCELLED":
-      return { readyAt: null, doneAt: null };
+      return { readyAt: null, doneAt: null, comingAt: null };
   }
 }

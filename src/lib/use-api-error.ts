@@ -58,6 +58,10 @@ export function useApiErrorMessage() {
         return t("BRANCH_NOT_FOUND");
       case "RATE_LIMITED":
         return t("RATE_LIMITED");
+      case "NOT_READY":
+        return t("NOT_READY");
+      case "ONLY_READY_RING":
+        return t("ONLY_READY_RING");
       default:
         return t("generic");
     }

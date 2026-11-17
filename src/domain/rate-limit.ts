@@ -22,6 +22,8 @@ export const RATE_POLICIES = {
   // the customer page asks every 3 s (= 20 per minute) for its own order
   orderStatus: { name: "order-status", limit: 60, windowMs: MINUTE },
   release: { name: "release", limit: 10, windowMs: 10 * MINUTE },
+  // "I'm coming": once is enough, a few extra taps are fine
+  coming: { name: "coming", limit: 20, windowMs: 10 * MINUTE },
 } as const satisfies Record<string, RatePolicy>;
 
 export interface RateDecision {

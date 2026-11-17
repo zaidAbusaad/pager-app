@@ -332,4 +332,41 @@ describe("order service", () => {
       ).rejects.toMatchObject({ reason: "ORDER_NOT_FOUND" });
     });
   });
+
+  describe("ringAgain", () => {
+    it("forgets the customer's 'I'm coming' on a ready order", async () => {
+      const order = await service.createOrder("shop-1");
+      await service.setStatus("shop-1", order.id, "READY");
+      await repo.markComing(order.id, clock);
+      expect((await repo.findById(order.id))?.comingAt).toEqual(clock);
+
+      const rung = await service.ringAgain("shop-1", order.id);
+      expect(rung.comingAt).toBeNull();
+    });
+
+    it("refuses an order that is not ready", async () => {
+      const order = await service.createOrder("shop-1");
+      await expect(service.ringAgain("shop-1", order.id)).rejects.toMatchObject({
+        code: "INVALID_TRANSITION",
+        reason: "ONLY_READY_RING",
+      });
+    });
+
+    it("cannot reach another shop's order", async () => {
+      const order = await service.createOrder("shop-2");
+      await service.setStatus("shop-2", order.id, "READY");
+      await expect(service.ringAgain("shop-1", order.id)).rejects.toMatchObject({
+        code: "NOT_FOUND",
+      });
+    });
+
+    it("a new 'ready' after an undo starts without the old 'I'm coming'", async () => {
+      const order = await service.createOrder("shop-1");
+      await service.setStatus("shop-1", order.id, "READY");
+      await repo.markComing(order.id, clock);
+      await service.setStatus("shop-1", order.id, "PREPARING");
+      const again = await service.setStatus("shop-1", order.id, "READY");
+      expect(again.comingAt).toBeNull();
+    });
+  });
 });

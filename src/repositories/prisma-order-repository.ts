@@ -246,6 +246,29 @@ export class PrismaOrderRepository implements OrderRepository {
     });
   }
 
+  async markComing(orderId: string, now: Date): Promise<Order | null> {
+    const prisma = getPrisma();
+    // "comingAt: null" keeps the FIRST tap's time. Zero rows can also just mean
+    // "already marked", so we read the order back to tell the two apart.
+    await prisma.order.updateMany({
+      where: { id: orderId, status: "READY", comingAt: null },
+      data: { comingAt: now },
+    });
+    const order = await prisma.order.findUnique({ where: { id: orderId } });
+    return order && order.status === "READY" ? order : null;
+  }
+
+  async ringAgain(shopId: string, orderId: string): Promise<Order | null> {
+    const prisma = getPrisma();
+    // "shopId" in the filter keeps one shop from touching another's order.
+    const result = await prisma.order.updateMany({
+      where: { id: orderId, shopId, status: "READY" },
+      data: { comingAt: null },
+    });
+    if (result.count === 0) return null;
+    return prisma.order.findUnique({ where: { id: orderId } });
+  }
+
   async resetClaim(
     shopId: string,
     orderId: string,

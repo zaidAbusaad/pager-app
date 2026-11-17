@@ -14,6 +14,7 @@ type PublicOrder = {
   status: "PREPARING" | "READY" | "DONE" | "CANCELLED";
   shopName: string;
   shopSlug: string;
+  coming: boolean; // the customer tapped "I'm coming"
 };
 
 const POLL_MS = 3000;
@@ -26,6 +27,7 @@ export function OrderTracker({ token }: { token: string }) {
   const [missing, setMissing] = useState(false);
   const [soundOn, setSoundOn] = useState(false);
   const [releasing, setReleasing] = useState(false);
+  const [sendingComing, setSendingComing] = useState(false);
 
   // Ask the server for the latest status (also called on a timer).
   const refresh = useCallback(async () => {
@@ -63,9 +65,11 @@ export function OrderTracker({ token }: { token: string }) {
     else safeStorage.set(activeOrderKey(shopSlug), token);
   }, [shopSlug, status, token]);
 
-  // Ring while the order is READY (every 4s until it is collected).
+  // Ring while the order is READY, until it is collected or the customer
+  // taps "I'm coming" (the cashier's "Ring again" makes it ring again).
+  const coming = order?.coming ?? false;
   useEffect(() => {
-    if (status !== "READY") return;
+    if (status !== "READY" || coming) return;
     const ring = () => {
       playChime();
       vibrate();
@@ -73,7 +77,7 @@ export function OrderTracker({ token }: { token: string }) {
     ring();
     const timer = setInterval(ring, 4000);
     return () => clearInterval(timer);
-  }, [status]);
+  }, [status, coming]);
 
   // Show the status in the browser tab title too.
   const number = order?.number;
@@ -109,6 +113,22 @@ export function OrderTracker({ token }: { token: string }) {
   function enableSound() {
     setSoundOn(unlockAudio());
     playChime(); // short test so the customer hears that it works
+  }
+
+  // "I'm coming": silences the phone and tells the cashier.
+  async function imComing() {
+    if (sendingComing) return;
+    setSendingComing(true);
+    try {
+      const res = await fetch(`/api/public/orders/${token}/coming`, {
+        method: "POST",
+      });
+      if (res.ok) setOrder((await res.json()) as PublicOrder);
+    } catch {
+      /* offline: the button stays, they can tap again */
+    } finally {
+      setSendingComing(false);
+    }
   }
 
   // "Not my order": let go of it so the rightful customer can claim it.
@@ -196,7 +216,18 @@ export function OrderTracker({ token }: { token: string }) {
             <p className={styles.status} data-state={state}>
               {t("ready")}
             </p>
-            <p className={styles.hint}>{t("collect")}</p>
+            <p className={styles.hint}>
+              {order.coming ? t("comingThanks") : t("collect")}
+            </p>
+            {!order.coming && (
+              <button
+                className={styles.button}
+                onClick={imComing}
+                disabled={sendingComing}
+              >
+                {t("coming")}
+              </button>
+            )}
           </>
         )}
 

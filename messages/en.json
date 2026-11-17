@@ -84,8 +84,12 @@
       "badNumber": "Enter a number from 1 to 9999, or leave it empty.",
       "badNumberShort": "Enter a number from 1 to 9999.",
       "linkReset": "Link reset. Show the new QR.",
-      "cancelled": "Order cancelled"
-    }
+      "cancelled": "Order cancelled",
+      "ringedAgain": "Ringing again"
+    },
+    "onTheWay": "On the way",
+    "ringAgain": "Ring again",
+    "ariaRingAgain": "Ring order #{number} again"
   },
   "claim": {
     "finding": "Finding your order…",
@@ -116,7 +120,9 @@
     "titleReady": "READY - #{number}",
     "titleWaiting": "#{number} - {shop}",
     "cancelled": "This order was cancelled.",
-    "cancelledHint": "Please ask the staff if you have a question."
+    "cancelledHint": "Please ask the staff if you have a question.",
+    "coming": "I'm coming",
+    "comingThanks": "Thanks! The cashier knows you are on your way."
   },
   "auth": {
     "loginTitle": "Log in",
@@ -423,7 +429,9 @@
     "SLUG_UNAVAILABLE": "Could not create the branch address. Please try again.",
     "BRANCH_NOT_FOUND": "Branch not found.",
     "generic": "That didn't work. Please try again.",
-    "offline": "No connection. Please check your internet and try again."
+    "offline": "No connection. Please check your internet and try again.",
+    "NOT_READY": "This order is not ready yet.",
+    "ONLY_READY_RING": "Only ready orders can be rung again."
   },
   "legal": {
     "updated": "Last updated: November 2026",

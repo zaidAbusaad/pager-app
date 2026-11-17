@@ -267,4 +267,51 @@ describe("customer service", () => {
       ).rejects.toMatchObject({ reason: "ALREADY_CLAIMED", number: 27 });
     });
   });
+
+  describe("imComing", () => {
+    async function readyOrder() {
+      const created = await cashier.createOrder("shop-1", 5);
+      const { order } = await customer.claimLatest("demo-cafe");
+      await cashier.setStatus("shop-1", created.id, "READY");
+      return order;
+    }
+
+    it("marks a ready order as 'on the way'", async () => {
+      const order = await readyOrder();
+      const result = await customer.imComing(order.claimToken);
+      expect(result.order.comingAt).toEqual(now);
+      expect(result.shop.name).toBe("Demo Cafe");
+    });
+
+    it("is harmless to tap twice and keeps the first time", async () => {
+      const order = await readyOrder();
+      const first = await customer.imComing(order.claimToken);
+      minutesLater(1);
+      const second = await customer.imComing(order.claimToken);
+      expect(second.order.comingAt).toEqual(first.order.comingAt);
+    });
+
+    it("refuses an order that is not ready yet", async () => {
+      await cashier.createOrder("shop-1", 6);
+      const { order } = await customer.claimLatest("demo-cafe");
+      await expect(customer.imComing(order.claimToken)).rejects.toMatchObject({
+        code: "CONFLICT",
+        reason: "NOT_READY",
+      });
+    });
+
+    it("refuses an order that was already collected", async () => {
+      const order = await readyOrder();
+      await cashier.setStatus("shop-1", order.id, "DONE");
+      await expect(customer.imComing(order.claimToken)).rejects.toMatchObject({
+        reason: "NOT_READY",
+      });
+    });
+
+    it("fails with NOT_FOUND for an unknown link", async () => {
+      await expect(customer.imComing("x".repeat(22))).rejects.toMatchObject({
+        code: "NOT_FOUND",
+      });
+    });
+  });
 });

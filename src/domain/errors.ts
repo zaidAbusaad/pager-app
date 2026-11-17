@@ -33,7 +33,9 @@ export type DomainErrorReason =
   | "TOO_MANY_BRANCHES"
   | "SLUG_UNAVAILABLE"
   | "BRANCH_NOT_FOUND"
-  | "RATE_LIMITED";
+  | "RATE_LIMITED"
+  | "NOT_READY"
+  | "ONLY_READY_RING";
 
 interface DomainErrorOptions {
   reason?: DomainErrorReason; // defaults to the code itself
