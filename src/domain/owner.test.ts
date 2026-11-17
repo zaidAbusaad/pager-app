@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import { isAcceptablePassword, isValidEmail, normalizeEmail, normalizePhone } from "./owner";
 import { generateTemporaryPassword, hashPassword, verifyPassword } from "./password";
@@ -69,5 +70,21 @@ describe("generateTemporaryPassword", () => {
     const a = generateTemporaryPassword();
     expect(a).not.toBe(generateTemporaryPassword());
     expect(isAcceptablePassword(a)).toBe(true);
+  });
+});
+
+describe("temporary passwords made in SQL", () => {
+  // what the Neon query produces for salt "ab12cd34" and password "k7qm-x2vp-9tna"
+  const stored = (salt: string, password: string) =>
+    `sha256$${salt}$${createHash("sha256").update(salt + password, "utf8").digest("hex")}`;
+
+  it("verifies the right password and refuses a wrong one", async () => {
+    const hash = stored("ab12cd34", "k7qm-x2vp-9tna");
+    await expect(verifyPassword("k7qm-x2vp-9tna", hash)).resolves.toBe(true);
+    await expect(verifyPassword("k7qm-x2vp-9tnb", hash)).resolves.toBe(false);
+  });
+
+  it("refuses a malformed hash", async () => {
+    await expect(verifyPassword("x", "sha256$")).resolves.toBe(false);
   });
 });

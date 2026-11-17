@@ -65,10 +65,35 @@ npm run admin -- reset-password owner@cafe.jo  # forgot password (see below)
 
 **Forgot password.** The login page links to WhatsApp. First check it is really
 the owner (their WhatsApp number should match the phone shown by `list`). Then
-run `reset-password`: it prints a temporary password once, ends every login of
-that account, and forces the owner to choose their own at the next login. Add
-`--print-sql` to get the SQL to paste into the Neon SQL Editor instead of
-changing the database from your PC.
+use the Neon SQL Editor (no PowerShell needed). Paste this, put the owner's
+email in the one place marked, and run it:
+
+```sql
+WITH pw AS (
+  SELECT substr(replace(gen_random_uuid()::text, '-', ''), 1, 4) || '-' ||
+         substr(replace(gen_random_uuid()::text, '-', ''), 1, 4) || '-' ||
+         substr(replace(gen_random_uuid()::text, '-', ''), 1, 4) AS pw,
+         substr(replace(gen_random_uuid()::text, '-', ''), 1, 8) AS salt
+),
+upd AS (
+  UPDATE "Owner"
+  SET "passwordHash" = 'sha256$' || (SELECT salt FROM pw) || '$' ||
+        encode(sha256(convert_to((SELECT salt FROM pw) || (SELECT pw FROM pw), 'UTF8')), 'hex'),
+      "mustChangePassword" = true
+  WHERE "email" = lower('owner@cafe.jo')   -- <-- the owner's email
+  RETURNING "id"
+),
+gone AS (
+  DELETE FROM "OwnerSession" WHERE "ownerId" IN (SELECT "id" FROM upd)
+)
+SELECT pw AS temporary_password, (SELECT count(*) FROM upd) AS accounts_changed FROM pw;
+```
+
+It shows the temporary password once, and `accounts_changed` must be 1 (0 means
+the email does not exist). It also ends every login of that account. Send the
+password on WhatsApp: the owner is forced to choose their own at the next login,
+and the temporary password stops working then. (`npm run admin -- reset-password`
+does the same from your PC if you ever prefer it.)
 
 Renewing adds to the current end date, so paying early loses no days. When an
 account ends there is a 3-day grace period, then the cashier screen stops.

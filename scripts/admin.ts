@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { normalizeEmail } from "../src/domain/owner";
+import { isValidEmail, normalizeEmail } from "../src/domain/owner";
 import { generateTemporaryPassword, hashPassword } from "../src/domain/password";
 import {
   GRACE_DAYS,
@@ -56,6 +56,29 @@ async function main() {
   const [command, rawEmail, rawMonths] = args.filter((a) => a !== "--print-sql");
   if (!command) usage();
 
+  // --print-sql needs NO database connection: it only makes the password and
+  // the SQL, and you paste the SQL into the Neon SQL Editor yourself.
+  if (command === "reset-password" && printSql) {
+    if (!rawEmail) usage();
+    const email = normalizeEmail(rawEmail);
+    // the email goes inside quotes in the SQL below, so refuse odd characters
+    if (!isValidEmail(email) || email.includes("'")) {
+      console.error("That does not look like a valid email address.");
+      process.exit(1);
+    }
+    const temporary = generateTemporaryPassword();
+    const hash = await hashPassword(temporary);
+    // The hash only has letters, digits, $ + / = so it is safe in quotes.
+    console.log("Paste this in the Neon SQL Editor and run it:\n");
+    console.log(`UPDATE "Owner" SET "passwordHash" = '${hash}', "mustChangePassword" = true WHERE "email" = '${email}';`);
+    console.log(`DELETE FROM "OwnerSession" WHERE "ownerId" IN (SELECT "id" FROM "Owner" WHERE "email" = '${email}');`);
+    console.log("\nNothing has been changed yet. After running it, Neon shows how many rows were");
+    console.log("updated: if the first statement says 0 rows, the email does not exist.");
+    console.log(`\nTemporary password: ${temporary}`);
+    console.log("Send it on WhatsApp. They must choose their own at the next login.");
+    return;
+  }
+
   const connectionString = process.env.DIRECT_URL ?? process.env.DATABASE_URL;
   if (!connectionString) throw new Error("DIRECT_URL / DATABASE_URL is not set");
 
@@ -104,22 +127,14 @@ async function main() {
     if (command === "reset-password") {
       const temporary = generateTemporaryPassword();
       const hash = await hashPassword(temporary);
-      if (printSql) {
-        // The hash only has letters, digits, $ + / = so it is safe in quotes.
-        console.log(`Paste these in the Neon SQL Editor (run both together):\n`);
-        console.log(`UPDATE "Owner" SET "passwordHash" = '${hash}', "mustChangePassword" = true WHERE "email" = '${email}';`);
-        console.log(`DELETE FROM "OwnerSession" WHERE "ownerId" = (SELECT "id" FROM "Owner" WHERE "email" = '${email}');`);
-        console.log(`\nNothing was changed yet.`);
-      } else {
-        await prisma.$transaction([
-          prisma.owner.update({
-            where: { id: owner.id },
-            data: { passwordHash: hash, mustChangePassword: true },
-          }),
-          prisma.ownerSession.deleteMany({ where: { ownerId: owner.id } }),
-        ]);
-        console.log(`${email}: password reset, all logins ended.`);
-      }
+      await prisma.$transaction([
+        prisma.owner.update({
+          where: { id: owner.id },
+          data: { passwordHash: hash, mustChangePassword: true },
+        }),
+        prisma.ownerSession.deleteMany({ where: { ownerId: owner.id } }),
+      ]);
+      console.log(`${email}: password reset, all logins ended.`);
       console.log(`\nTemporary password: ${temporary}`);
       console.log(`Send it on WhatsApp. They must choose their own at the next login.`);
     } else if (command === "activate") {

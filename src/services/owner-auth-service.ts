@@ -6,7 +6,7 @@ import {
   normalizeEmail,
   normalizePhone,
 } from "@/domain/owner";
-import { hashPassword, verifyPassword } from "@/domain/password";
+import { TEMPORARY_HASH_PREFIX, hashPassword, verifyPassword } from "@/domain/password";
 import {
   SESSION_TTL_MS,
   generateSessionToken,
@@ -73,6 +73,10 @@ export function createOwnerAuthService({ owners, sessions, now = () => new Date(
       dummyHash ??= hashPassword("not-a-real-password");
       const ok = await verifyPassword(input.password, found?.passwordHash ?? (await dummyHash));
       if (!found || !ok) throw deny();
+      // a temporary (SQL-made) password only counts on an account flagged for reset
+      if (found.passwordHash.startsWith(TEMPORARY_HASH_PREFIX) && !found.mustChangePassword) {
+        throw deny();
+      }
       return startSession({
         id: found.id,
         email: found.email,

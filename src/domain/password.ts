@@ -1,4 +1,4 @@
-import { randomBytes, randomInt, scrypt, timingSafeEqual } from "node:crypto";
+import { createHash, randomBytes, randomInt, scrypt, timingSafeEqual } from "node:crypto";
 
 // Passwords are chosen by humans, so they are short and guessable. We store
 // them with scrypt: a hash that is deliberately slow and memory-hungry, which
@@ -35,10 +35,28 @@ export async function hashPassword(password: string): Promise<string> {
   return ["scrypt", N, R, P, salt.toString("base64"), key.toString("base64")].join("$");
 }
 
+// TEMPORARY passwords set by hand in the Neon SQL Editor (see docs/DEPLOY.md).
+// Postgres cannot compute scrypt, but it can compute this in one query:
+//   'sha256$' || salt || '$' || encode(sha256(convert_to(salt || password, 'UTF8')), 'hex')
+// It is much weaker than scrypt, which is fine only because the account is
+// flagged mustChangePassword and the owner replaces it with a real (scrypt)
+// password at their first login. The login service refuses this format on any
+// account that is not flagged.
+export const TEMPORARY_HASH_PREFIX = "sha256$";
+
+function verifyTemporary(password: string, stored: string): boolean {
+  const [, salt, hex] = stored.split("$");
+  if (!salt || !hex) return false;
+  const actual = createHash("sha256").update(salt + password, "utf8").digest();
+  const expected = Buffer.from(hex, "hex");
+  return actual.length === expected.length && timingSafeEqual(actual, expected);
+}
+
 export async function verifyPassword(
   password: string,
   stored: string,
 ): Promise<boolean> {
+  if (stored.startsWith(TEMPORARY_HASH_PREFIX)) return verifyTemporary(password, stored);
   const [scheme, n, r, p, salt, hash] = stored.split("$");
   if (scheme !== "scrypt" || !salt || !hash) return false;
   const expected = Buffer.from(hash, "base64");

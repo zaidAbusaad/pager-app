@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { beforeEach, describe, expect, it } from "vitest";
 import { SESSION_TTL_MS } from "@/domain/session-token";
 import {
@@ -162,5 +163,38 @@ describe("forced password change", () => {
     owners.owners.get("owner@cafe.jo")!.mustChangePassword = true;
     const login = await auth.login(creds);
     expect(login.owner.mustChangePassword).toBe(true);
+  });
+});
+
+describe("temporary SQL passwords", () => {
+  const temp = (salt: string, password: string) =>
+    `sha256$${salt}$${createHash("sha256").update(salt + password, "utf8").digest("hex")}`;
+
+  it("log in only on an account flagged for reset", async () => {
+    await auth.register(creds);
+    const row = owners.owners.get("owner@cafe.jo")!;
+    row.passwordHash = temp("ab12cd34", "k7qm-x2vp-9tna");
+
+    row.mustChangePassword = false;
+    await expect(
+      auth.login({ email: creds.email, password: "k7qm-x2vp-9tna" }),
+    ).rejects.toMatchObject({ code: "UNAUTHORIZED" });
+
+    row.mustChangePassword = true;
+    const login = await auth.login({ email: creds.email, password: "k7qm-x2vp-9tna" });
+    expect(login.owner.mustChangePassword).toBe(true);
+  });
+
+  it("are replaced by a real password when the owner changes it", async () => {
+    const { owner, sessionToken } = await auth.register(creds);
+    const row = owners.owners.get("owner@cafe.jo")!;
+    row.passwordHash = temp("ab12cd34", "k7qm-x2vp-9tna");
+    row.mustChangePassword = true;
+    await auth.changePassword(owner.id, sessionToken, {
+      currentPassword: "k7qm-x2vp-9tna",
+      newPassword: "brand-new-pass",
+    });
+    expect(row.passwordHash.startsWith("scrypt$")).toBe(true);
+    expect(row.mustChangePassword).toBe(false);
   });
 });
