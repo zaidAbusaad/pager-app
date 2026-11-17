@@ -4,12 +4,14 @@ import { RATE_POLICIES } from "@/domain/rate-limit";
 import { normalizeEmail } from "@/domain/owner";
 import { clientIp } from "@/lib/client-ip";
 import { ownerAuth, rateLimiter } from "@/server/container";
+import { assertSameOrigin } from "@/server/same-origin";
 import { setSessionCookie } from "@/server/owner-session";
 import { credentialsBody } from "@/validation/owner-schemas";
 
 // POST /api/owner/auth/login   body: { email, password }
 export async function POST(request: NextRequest) {
   return handle(async () => {
+    assertSameOrigin(request);
     const body = credentialsBody.parse(await request.json());
     // limit guesses per address AND per account (a botnet has many addresses)
     await rateLimiter.consume(RATE_POLICIES.login, clientIp(request.headers));

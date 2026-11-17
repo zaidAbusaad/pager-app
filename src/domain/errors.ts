@@ -9,6 +9,7 @@ export type DomainErrorCode =
   | "ALREADY_CLAIMED" // another phone already linked to that order
   | "INVALID_INPUT" // the request was understood but a value is not acceptable
   | "SUBSCRIPTION_INACTIVE" // the owner's account is not activated, or it expired
+  | "FORBIDDEN" // refused on purpose, e.g. the request came from another website
   | "TOO_MANY_REQUESTS"; // the caller hit a rate limit (see domain/rate-limit.ts)
 
 // A stable, language-free label for WHY something failed. The server's English
