@@ -13,7 +13,10 @@ export class InMemoryOwnerRepository implements OwnerRepository {
 
   async create(input: { email: string; passwordHash: string }): Promise<CreateOwnerResult> {
     if (this.owners.has(input.email)) return { kind: "email_taken" };
-    const owner = { id: `owner-${++this.sequence}`, ...input, activeUntil: null, phone: null };
+    const owner = { id: `owner-${++this.sequence}`, ...input, activeUntil: null,
+      phone: null,
+      mustChangePassword: false,
+    };
     this.owners.set(input.email, owner);
     return {
       kind: "created",
@@ -22,6 +25,7 @@ export class InMemoryOwnerRepository implements OwnerRepository {
         email: owner.email,
         activeUntil: owner.activeUntil,
         phone: owner.phone,
+        mustChangePassword: owner.mustChangePassword,
       },
     };
   }
@@ -41,7 +45,10 @@ export class InMemoryOwnerRepository implements OwnerRepository {
 
   async updatePasswordHash(id: string, passwordHash: string) {
     const owner = await this.findById(id);
-    if (owner) owner.passwordHash = passwordHash;
+    if (owner) {
+      owner.passwordHash = passwordHash;
+      owner.mustChangePassword = false;
+    }
   }
 }
 
@@ -67,6 +74,7 @@ export class InMemorySessionRepository implements SessionRepository {
           email: owner.email,
           activeUntil: owner.activeUntil,
           phone: owner.phone,
+          mustChangePassword: owner.mustChangePassword,
         }
       : null;
   }

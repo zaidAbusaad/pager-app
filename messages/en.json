@@ -435,7 +435,8 @@
     "NOT_READY": "This order is not ready yet.",
     "ONLY_READY_RING": "Only ready orders can be rung again.",
     "INVALID_PHONE": "Enter a valid Jordanian mobile number, like 0791234567.",
-    "WRONG_CURRENT_PASSWORD": "Your current password is wrong."
+    "WRONG_CURRENT_PASSWORD": "Your current password is wrong.",
+    "PASSWORD_CHANGE_REQUIRED": "Please choose a new password first."
   },
   "legal": {
     "updated": "Last updated: November 2026",
@@ -572,6 +573,7 @@
     "newHint": "At least 8 characters.",
     "passwordSave": "Change password",
     "passwordSaved": "Password changed.",
-    "working": "One moment…"
+    "working": "One moment…",
+    "mustChange": "You are using a temporary password. Choose your own password below to continue."
   }
 }

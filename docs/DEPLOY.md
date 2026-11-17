@@ -60,7 +60,15 @@ npm run admin -- list                          # every account and its status
 npm run admin -- activate owner@cafe.jo 1      # +1 month (first activation too)
 npm run admin -- activate owner@cafe.jo 12     # a yearly payment
 npm run admin -- deactivate owner@cafe.jo      # stop the cashier right now
+npm run admin -- reset-password owner@cafe.jo  # forgot password (see below)
 ```
+
+**Forgot password.** The login page links to WhatsApp. First check it is really
+the owner (their WhatsApp number should match the phone shown by `list`). Then
+run `reset-password`: it prints a temporary password once, ends every login of
+that account, and forces the owner to choose their own at the next login. Add
+`--print-sql` to get the SQL to paste into the Neon SQL Editor instead of
+changing the database from your PC.
 
 Renewing adds to the current end date, so paying early loses no days. When an
 account ends there is a 3-day grace period, then the cashier screen stops.

@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect, useState, type FormEvent } from "react";
+import { useRouter } from "@/i18n/navigation";
 import { useApiErrorMessage, useOfflineMessage } from "@/lib/use-api-error";
 import owner from "../../owner.module.css";
 import styles from "../account.module.css";
@@ -13,7 +14,9 @@ export function Settings() {
   const t = useTranslations("settings");
   const apiError = useApiErrorMessage();
   const offlineMessage = useOfflineMessage();
+  const router = useRouter();
 
+  const [mustChange, setMustChange] = useState(false);
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [phoneNotice, setPhoneNotice] = useState<Notice>(null);
@@ -26,7 +29,12 @@ export function Settings() {
     (async () => {
       const res = await fetch("/api/owner/me", { cache: "no-store" }).catch(() => null);
       if (!res?.ok) return; // the shell sends logged-out visitors to /login
-      const me = (await res.json()) as { email: string; phone: string | null };
+      const me = (await res.json()) as {
+        email: string;
+        phone: string | null;
+        mustChangePassword: boolean;
+      };
+      setMustChange(me.mustChangePassword);
       setEmail(me.email);
       setPhone(me.phone ?? "");
     })();
@@ -83,6 +91,8 @@ export function Settings() {
       async () => {
         setCurrent("");
         setNext("");
+        // The forced change is done: go to the app (the menu re-checks on the way).
+        if (mustChange) router.replace("/account");
         return { kind: "ok", text: t("passwordSaved") };
       },
       setPasswordNotice,
@@ -99,6 +109,11 @@ export function Settings() {
   return (
     <div className={styles.page}>
       <h1 className={styles.title}>{t("title")}</h1>
+      {mustChange && (
+        <p className={owner.error} role="alert">
+          {t("mustChange")}
+        </p>
+      )}
       {email && (
         <p className={styles.muted}>
           {t("email")}: <bdi dir="ltr">{email}</bdi>

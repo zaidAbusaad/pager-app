@@ -9,7 +9,7 @@ import { changePasswordBody } from "@/validation/owner-schemas";
 // POST /api/owner/password   body: { currentPassword, newPassword }
 export async function POST(request: NextRequest) {
   return handle(async () => {
-    const owner = await requireOwner(request);
+    const owner = await requireOwner(request, { allowPasswordChange: true });
     const body = changePasswordBody.parse(await request.json());
     await rateLimiter.consume(RATE_POLICIES.changePassword, owner.id);
     const token = request.cookies.get(SESSION_COOKIE)?.value ?? "";

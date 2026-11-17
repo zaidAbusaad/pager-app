@@ -27,12 +27,21 @@ export function OwnerShell({ children }: { children: React.ReactNode }) {
       const res = await fetch("/api/owner/me", { cache: "no-store" }).catch(() => null);
       if (res?.status === 401) return router.replace("/login");
       if (res?.ok) {
-        const me = (await res.json()) as { email: string; subscription: SubscriptionSummary };
+        const me = (await res.json()) as {
+          email: string;
+          subscription: SubscriptionSummary;
+          mustChangePassword: boolean;
+        };
         setEmail(me.email);
         setSubscription(me.subscription);
+        // After an admin reset the only page they may use is Settings.
+        if (me.mustChangePassword && !pathname.startsWith("/account/settings")) {
+          router.replace("/account/settings");
+        }
       }
     })();
-  }, [router]);
+    // runs on every page change too, so the check ends once they have changed it
+  }, [router, pathname]);
 
   async function logout() {
     await fetch("/api/owner/auth/logout", { method: "POST" }).catch(() => null);

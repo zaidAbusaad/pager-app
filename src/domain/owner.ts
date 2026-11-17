@@ -8,6 +8,8 @@ export interface Owner {
   activeUntil: Date | null;
   // Contact number in the form +9627XXXXXXXX, or null when not given.
   phone: string | null;
+  // True after an admin reset: only the change-password screen may be used.
+  mustChangePassword: boolean;
 }
 
 export const MIN_PASSWORD_LENGTH = 8;

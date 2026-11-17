@@ -13,7 +13,7 @@ export class PrismaOwnerRepository implements OwnerRepository {
     try {
       const owner = await getPrisma().owner.create({
         data: input,
-        select: { id: true, email: true, activeUntil: true, phone: true },
+        select: { id: true, email: true, activeUntil: true, phone: true, mustChangePassword: true },
       });
       return { kind: "created", owner };
     } catch (error) {
@@ -28,14 +28,14 @@ export class PrismaOwnerRepository implements OwnerRepository {
   findByEmail(email: string): Promise<OwnerWithPassword | null> {
     return getPrisma().owner.findUnique({
       where: { email },
-      select: { id: true, email: true, activeUntil: true, phone: true, passwordHash: true },
+      select: { id: true, email: true, activeUntil: true, phone: true, mustChangePassword: true, passwordHash: true },
     });
   }
 
   findById(id: string): Promise<OwnerWithPassword | null> {
     return getPrisma().owner.findUnique({
       where: { id },
-      select: { id: true, email: true, activeUntil: true, phone: true, passwordHash: true },
+      select: { id: true, email: true, activeUntil: true, phone: true, mustChangePassword: true, passwordHash: true },
     });
   }
 
@@ -44,7 +44,11 @@ export class PrismaOwnerRepository implements OwnerRepository {
   }
 
   async updatePasswordHash(id: string, passwordHash: string): Promise<void> {
-    await getPrisma().owner.update({ where: { id }, data: { passwordHash } });
+    // choosing a password is exactly what "must change" asks for
+    await getPrisma().owner.update({
+      where: { id },
+      data: { passwordHash, mustChangePassword: false },
+    });
   }
 }
 
@@ -58,7 +62,7 @@ export class PrismaSessionRepository implements SessionRepository {
       where: { tokenHash },
       select: {
         expiresAt: true,
-        owner: { select: { id: true, email: true, activeUntil: true, phone: true } },
+        owner: { select: { id: true, email: true, activeUntil: true, phone: true, mustChangePassword: true } },
       },
     });
     if (!session || session.expiresAt <= now) return null;

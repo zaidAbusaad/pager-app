@@ -56,6 +56,8 @@ export function useApiErrorMessage() {
         return t("SLUG_UNAVAILABLE");
       case "BRANCH_NOT_FOUND":
         return t("BRANCH_NOT_FOUND");
+      case "PASSWORD_CHANGE_REQUIRED":
+        return t("PASSWORD_CHANGE_REQUIRED");
       case "INVALID_PHONE":
         return t("INVALID_PHONE");
       case "WRONG_CURRENT_PASSWORD":

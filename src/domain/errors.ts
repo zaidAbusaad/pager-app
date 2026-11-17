@@ -37,7 +37,8 @@ export type DomainErrorReason =
   | "NOT_READY"
   | "ONLY_READY_RING"
   | "INVALID_PHONE"
-  | "WRONG_CURRENT_PASSWORD";
+  | "WRONG_CURRENT_PASSWORD"
+  | "PASSWORD_CHANGE_REQUIRED";
 
 interface DomainErrorOptions {
   reason?: DomainErrorReason; // defaults to the code itself

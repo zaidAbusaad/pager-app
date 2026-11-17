@@ -78,6 +78,7 @@ export function createOwnerAuthService({ owners, sessions, now = () => new Date(
         email: found.email,
         activeUntil: found.activeUntil,
         phone: found.phone,
+        mustChangePassword: found.mustChangePassword,
       });
     },
 

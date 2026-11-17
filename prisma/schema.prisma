@@ -59,6 +59,10 @@ model Owner {
   // Contact number (+9627XXXXXXXX), so you can reach the owner about renewals.
   phone String?
 
+  // Set by "npm run admin -- reset-password": the owner logged in with a
+  // temporary password and must choose their own before doing anything else.
+  mustChangePassword Boolean @default(false)
+
   createdAt DateTime       @default(now())
   shops     Shop[]
   sessions  OwnerSession[]

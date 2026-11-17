@@ -145,3 +145,22 @@ describe("changePassword", () => {
     ).resolves.toMatchObject({ owner: { id: first.owner.id } });
   });
 });
+
+describe("forced password change", () => {
+  it("is cleared once the owner chooses a new password", async () => {
+    const { owner, sessionToken } = await auth.register(creds);
+    owners.owners.get("owner@cafe.jo")!.mustChangePassword = true;
+    await auth.changePassword(owner.id, sessionToken, {
+      currentPassword: creds.password,
+      newPassword: "brand-new-pass",
+    });
+    expect(owners.owners.get("owner@cafe.jo")?.mustChangePassword).toBe(false);
+  });
+
+  it("is reported at login so the site can send them to Settings", async () => {
+    await auth.register(creds);
+    owners.owners.get("owner@cafe.jo")!.mustChangePassword = true;
+    const login = await auth.login(creds);
+    expect(login.owner.mustChangePassword).toBe(true);
+  });
+});

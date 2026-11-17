@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { isAcceptablePassword, isValidEmail, normalizeEmail, normalizePhone } from "./owner";
-import { hashPassword, verifyPassword } from "./password";
+import { generateTemporaryPassword, hashPassword, verifyPassword } from "./password";
 
 describe("normalizePhone", () => {
   it.each([
@@ -57,5 +57,17 @@ describe("password hashing", () => {
 
   it("rejects malformed stored values instead of crashing", async () => {
     expect(await verifyPassword("x", "garbage")).toBe(false);
+  });
+});
+
+describe("generateTemporaryPassword", () => {
+  it("makes three groups of four easy-to-read characters", () => {
+    expect(generateTemporaryPassword()).toMatch(/^[a-km-zA-HJ-NP-Z2-9]{4}-[a-km-zA-HJ-NP-Z2-9]{4}-[a-km-zA-HJ-NP-Z2-9]{4}$/);
+  });
+
+  it("is different every time and acceptable as a password", () => {
+    const a = generateTemporaryPassword();
+    expect(a).not.toBe(generateTemporaryPassword());
+    expect(isAcceptablePassword(a)).toBe(true);
   });
 });

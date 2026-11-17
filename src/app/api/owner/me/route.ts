@@ -7,11 +7,12 @@ import { requireOwner } from "@/server/owner-session";
 // subscription stands, so the pages can show the right banner.
 export async function GET(request: NextRequest) {
   return handle(async () => {
-    const owner = await requireOwner(request);
+    const owner = await requireOwner(request, { allowPasswordChange: true });
     return Response.json(
       {
         email: owner.email,
         phone: owner.phone,
+        mustChangePassword: owner.mustChangePassword,
         subscription: summarizeSubscription(owner.activeUntil, new Date()),
       },
       { headers: { "Cache-Control": "no-store" } },
