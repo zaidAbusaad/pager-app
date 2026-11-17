@@ -13,16 +13,35 @@ export class InMemoryOwnerRepository implements OwnerRepository {
 
   async create(input: { email: string; passwordHash: string }): Promise<CreateOwnerResult> {
     if (this.owners.has(input.email)) return { kind: "email_taken" };
-    const owner = { id: `owner-${++this.sequence}`, ...input, activeUntil: null };
+    const owner = { id: `owner-${++this.sequence}`, ...input, activeUntil: null, phone: null };
     this.owners.set(input.email, owner);
     return {
       kind: "created",
-      owner: { id: owner.id, email: owner.email, activeUntil: owner.activeUntil },
+      owner: {
+        id: owner.id,
+        email: owner.email,
+        activeUntil: owner.activeUntil,
+        phone: owner.phone,
+      },
     };
   }
 
   async findByEmail(email: string) {
     return this.owners.get(email) ?? null;
+  }
+
+  async findById(id: string) {
+    return [...this.owners.values()].find((o) => o.id === id) ?? null;
+  }
+
+  async updatePhone(id: string, phone: string | null) {
+    const owner = await this.findById(id);
+    if (owner) owner.phone = phone;
+  }
+
+  async updatePasswordHash(id: string, passwordHash: string) {
+    const owner = await this.findById(id);
+    if (owner) owner.passwordHash = passwordHash;
   }
 }
 
@@ -43,8 +62,19 @@ export class InMemorySessionRepository implements SessionRepository {
     if (!session || session.expiresAt <= now) return null;
     const owner = [...this.owners.owners.values()].find((o) => o.id === session.ownerId);
     return owner
-      ? { id: owner.id, email: owner.email, activeUntil: owner.activeUntil }
+      ? {
+          id: owner.id,
+          email: owner.email,
+          activeUntil: owner.activeUntil,
+          phone: owner.phone,
+        }
       : null;
+  }
+
+  async deleteOthers(ownerId: string, keepTokenHash: string) {
+    for (const [hash, session] of this.sessions) {
+      if (session.ownerId === ownerId && hash !== keepTokenHash) this.sessions.delete(hash);
+    }
   }
 
   async deleteByTokenHash(tokenHash: string) {

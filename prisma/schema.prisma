@@ -56,6 +56,9 @@ model Owner {
   // it expires; renewing just moves this date forward.
   activeUntil DateTime?
 
+  // Contact number (+9627XXXXXXXX), so you can reach the owner about renewals.
+  phone String?
+
   createdAt DateTime       @default(now())
   shops     Shop[]
   sessions  OwnerSession[]

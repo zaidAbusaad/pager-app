@@ -8,6 +8,15 @@ export const credentialsBody = z.object({
   password: z.string().max(1024),
 });
 
+export const phoneBody = z.object({
+  phone: z.string().max(40),
+});
+
+export const changePasswordBody = z.object({
+  currentPassword: z.string().max(1024),
+  newPassword: z.string().max(1024),
+});
+
 export const createBranchBody = z.object({
   name: z.string().max(200),
 });

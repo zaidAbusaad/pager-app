@@ -15,7 +15,10 @@ export function OwnerShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   // Branches stays highlighted on its own page and on the poster page below it.
-  const onBranches = pathname.startsWith("/account") && !pathname.startsWith("/account/dashboard");
+  const onBranches =
+    pathname.startsWith("/account") &&
+    !pathname.startsWith("/account/dashboard") &&
+    !pathname.startsWith("/account/settings");
   const [email, setEmail] = useState<string | null>(null);
   const [subscription, setSubscription] = useState<SubscriptionSummary | null>(null);
 
@@ -55,6 +58,13 @@ export function OwnerShell({ children }: { children: React.ReactNode }) {
             aria-current={pathname.startsWith("/account/dashboard") ? "page" : undefined}
           >
             {t("dashboard")}
+          </Link>
+          <Link
+            className={styles.item}
+            href="/account/settings"
+            aria-current={pathname.startsWith("/account/settings") ? "page" : undefined}
+          >
+            {t("settings")}
           </Link>
         </div>
 

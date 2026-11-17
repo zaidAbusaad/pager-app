@@ -89,3 +89,59 @@ describe("sessions", () => {
     await expect(auth.authenticate(t)).rejects.toMatchObject({ code: "UNAUTHORIZED" });
   });
 });
+
+describe("updatePhone", () => {
+  it("stores the normalized number and clears it on empty", async () => {
+    const { owner } = await auth.register(creds);
+    await expect(auth.updatePhone(owner.id, " 079 123 4567 ")).resolves.toBe("+962791234567");
+    expect(owners.owners.get("owner@cafe.jo")?.phone).toBe("+962791234567");
+    await expect(auth.updatePhone(owner.id, "  ")).resolves.toBeNull();
+    expect(owners.owners.get("owner@cafe.jo")?.phone).toBeNull();
+  });
+
+  it("refuses a number that is not a Jordanian mobile", async () => {
+    const { owner } = await auth.register(creds);
+    await expect(auth.updatePhone(owner.id, "12345")).rejects.toMatchObject({
+      code: "INVALID_INPUT",
+      reason: "INVALID_PHONE",
+    });
+  });
+});
+
+describe("changePassword", () => {
+  it("needs the right current password", async () => {
+    const { owner, sessionToken } = await auth.register(creds);
+    await expect(
+      auth.changePassword(owner.id, sessionToken, {
+        currentPassword: "nope-nope",
+        newPassword: "brand-new-pass",
+      }),
+    ).rejects.toMatchObject({ reason: "WRONG_CURRENT_PASSWORD" });
+  });
+
+  it("refuses a weak new password", async () => {
+    const { owner, sessionToken } = await auth.register(creds);
+    await expect(
+      auth.changePassword(owner.id, sessionToken, {
+        currentPassword: creds.password,
+        newPassword: "short",
+      }),
+    ).rejects.toMatchObject({ reason: "WEAK_PASSWORD" });
+  });
+
+  it("switches the password and ends the OTHER sessions only", async () => {
+    const first = await auth.register(creds);
+    const other = await auth.login(creds); // a second device
+    await auth.changePassword(first.owner.id, first.sessionToken, {
+      currentPassword: creds.password,
+      newPassword: "brand-new-pass",
+    });
+
+    await expect(auth.authenticate(first.sessionToken)).resolves.toMatchObject({ id: first.owner.id });
+    await expect(auth.authenticate(other.sessionToken)).rejects.toMatchObject({ code: "UNAUTHORIZED" });
+    await expect(auth.login(creds)).rejects.toMatchObject({ code: "UNAUTHORIZED" });
+    await expect(
+      auth.login({ email: creds.email, password: "brand-new-pass" }),
+    ).resolves.toMatchObject({ owner: { id: first.owner.id } });
+  });
+});

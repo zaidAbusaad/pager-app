@@ -11,6 +11,7 @@ export async function GET(request: NextRequest) {
     return Response.json(
       {
         email: owner.email,
+        phone: owner.phone,
         subscription: summarizeSubscription(owner.activeUntil, new Date()),
       },
       { headers: { "Cache-Control": "no-store" } },

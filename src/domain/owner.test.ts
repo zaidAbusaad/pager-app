@@ -1,6 +1,26 @@
 import { describe, expect, it } from "vitest";
-import { isAcceptablePassword, isValidEmail, normalizeEmail } from "./owner";
+import { isAcceptablePassword, isValidEmail, normalizeEmail, normalizePhone } from "./owner";
 import { hashPassword, verifyPassword } from "./password";
+
+describe("normalizePhone", () => {
+  it.each([
+    "0791234567",
+    "791234567",
+    "+962 79 123 4567",
+    "00962-79-123-4567",
+    "962791234567",
+    "٠٧٩١٢٣٤٥٦٧",
+  ])("turns %s into the stored form", (raw) => {
+    expect(normalizePhone(raw)).toBe("+962791234567");
+  });
+
+  it.each(["", "12345", "0661234567", "07912345", "079123456789", "abc"])(
+    "refuses %s",
+    (raw) => {
+      expect(normalizePhone(raw)).toBeNull();
+    },
+  );
+});
 
 describe("owner rules", () => {
   it("normalizes email case and spaces", () => {

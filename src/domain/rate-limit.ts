@@ -13,6 +13,8 @@ export const RATE_POLICIES = {
   // password guessing: per IP address, and separately per email address
   login: { name: "login", limit: 10, windowMs: 15 * MINUTE },
   loginEmail: { name: "login-email", limit: 10, windowMs: 15 * MINUTE },
+  // guessing the CURRENT password through the change-password form
+  changePassword: { name: "change-password", limit: 10, windowMs: 15 * MINUTE },
   // mass account creation
   register: { name: "register", limit: 5, windowMs: 60 * MINUTE },
   // customer scanning the counter QR / typing a number. Many customers share

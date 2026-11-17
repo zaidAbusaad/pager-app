@@ -13,6 +13,9 @@ export interface OwnerRepository {
   // registering the same address at the same moment.
   create(input: { email: string; passwordHash: string }): Promise<CreateOwnerResult>;
   findByEmail(email: string): Promise<OwnerWithPassword | null>;
+  findById(id: string): Promise<OwnerWithPassword | null>;
+  updatePhone(id: string, phone: string | null): Promise<void>;
+  updatePasswordHash(id: string, passwordHash: string): Promise<void>;
 }
 
 export interface SessionRepository {
@@ -20,4 +23,6 @@ export interface SessionRepository {
   // Returns the owner only if the session exists and has not expired.
   findOwnerByTokenHash(tokenHash: string, now: Date): Promise<Owner | null>;
   deleteByTokenHash(tokenHash: string): Promise<void>;
+  // Logs the owner out everywhere except the session being used right now.
+  deleteOthers(ownerId: string, keepTokenHash: string): Promise<void>;
 }

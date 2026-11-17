@@ -35,7 +35,9 @@ export type DomainErrorReason =
   | "BRANCH_NOT_FOUND"
   | "RATE_LIMITED"
   | "NOT_READY"
-  | "ONLY_READY_RING";
+  | "ONLY_READY_RING"
+  | "INVALID_PHONE"
+  | "WRONG_CURRENT_PASSWORD";
 
 interface DomainErrorOptions {
   reason?: DomainErrorReason; // defaults to the code itself

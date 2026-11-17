@@ -59,6 +59,7 @@ async function main() {
         orderBy: { createdAt: "desc" },
         select: {
           email: true,
+          phone: true,
           activeUntil: true,
           createdAt: true,
           _count: { select: { shops: true } },
@@ -69,6 +70,7 @@ async function main() {
         const state = subscriptionState(o.activeUntil, now).toUpperCase();
         console.log(
           `${state.padEnd(8)} ${o.email.padEnd(34)} until ${show(o.activeUntil).padEnd(22)} ` +
+            `phone ${(o.phone ?? "-").padEnd(14)} ` +
             `branches ${o._count.shops}  signed up ${show(o.createdAt)}`,
         );
       }

@@ -13,7 +13,7 @@ export class PrismaOwnerRepository implements OwnerRepository {
     try {
       const owner = await getPrisma().owner.create({
         data: input,
-        select: { id: true, email: true, activeUntil: true },
+        select: { id: true, email: true, activeUntil: true, phone: true },
       });
       return { kind: "created", owner };
     } catch (error) {
@@ -28,8 +28,23 @@ export class PrismaOwnerRepository implements OwnerRepository {
   findByEmail(email: string): Promise<OwnerWithPassword | null> {
     return getPrisma().owner.findUnique({
       where: { email },
-      select: { id: true, email: true, activeUntil: true, passwordHash: true },
+      select: { id: true, email: true, activeUntil: true, phone: true, passwordHash: true },
     });
+  }
+
+  findById(id: string): Promise<OwnerWithPassword | null> {
+    return getPrisma().owner.findUnique({
+      where: { id },
+      select: { id: true, email: true, activeUntil: true, phone: true, passwordHash: true },
+    });
+  }
+
+  async updatePhone(id: string, phone: string | null): Promise<void> {
+    await getPrisma().owner.update({ where: { id }, data: { phone } });
+  }
+
+  async updatePasswordHash(id: string, passwordHash: string): Promise<void> {
+    await getPrisma().owner.update({ where: { id }, data: { passwordHash } });
   }
 }
 
@@ -43,7 +58,7 @@ export class PrismaSessionRepository implements SessionRepository {
       where: { tokenHash },
       select: {
         expiresAt: true,
-        owner: { select: { id: true, email: true, activeUntil: true } },
+        owner: { select: { id: true, email: true, activeUntil: true, phone: true } },
       },
     });
     if (!session || session.expiresAt <= now) return null;
@@ -52,5 +67,11 @@ export class PrismaSessionRepository implements SessionRepository {
 
   async deleteByTokenHash(tokenHash: string): Promise<void> {
     await getPrisma().ownerSession.deleteMany({ where: { tokenHash } });
+  }
+
+  async deleteOthers(ownerId: string, keepTokenHash: string): Promise<void> {
+    await getPrisma().ownerSession.deleteMany({
+      where: { ownerId, tokenHash: { not: keepTokenHash } },
+    });
   }
 }

@@ -15,7 +15,8 @@
     "poster": "QR poster",
     "dashboard": "Dashboard",
     "privacy": "Privacy policy",
-    "terms": "Terms of use"
+    "terms": "Terms of use",
+    "settings": "Settings"
   },
   "home": {
     "title": "Digital pager for restaurants and cafes",
@@ -199,7 +200,8 @@
     "branches": "Branches",
     "dashboard": "Dashboard",
     "soon": "Soon",
-    "logout": "Log out"
+    "logout": "Log out",
+    "settings": "Settings"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -431,7 +433,9 @@
     "generic": "That didn't work. Please try again.",
     "offline": "No connection. Please check your internet and try again.",
     "NOT_READY": "This order is not ready yet.",
-    "ONLY_READY_RING": "Only ready orders can be rung again."
+    "ONLY_READY_RING": "Only ready orders can be rung again.",
+    "INVALID_PHONE": "Enter a valid Jordanian mobile number, like 0791234567.",
+    "WRONG_CURRENT_PASSWORD": "Your current password is wrong."
   },
   "legal": {
     "updated": "Last updated: November 2026",
@@ -551,5 +555,23 @@
         }
       ]
     }
+  },
+  "settings": {
+    "title": "Settings",
+    "email": "Email",
+    "phoneTitle": "Phone number",
+    "phoneHelp": "So we can reach you about your subscription. Leave empty to remove it.",
+    "phoneLabel": "Mobile number",
+    "phoneSave": "Save number",
+    "phoneSaved": "Number saved.",
+    "phoneRemoved": "Number removed.",
+    "passwordTitle": "Change password",
+    "passwordHelp": "You will stay logged in here. Other devices will be logged out.",
+    "current": "Current password",
+    "new": "New password",
+    "newHint": "At least 8 characters.",
+    "passwordSave": "Change password",
+    "passwordSaved": "Password changed.",
+    "working": "One moment…"
   }
 }

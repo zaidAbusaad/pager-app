@@ -417,6 +417,7 @@ export function CashierBoard({ token }: { token: string }) {
                                       : t("collected")}
                                   </div>
                                 )}
+                                <div className={styles.statusRow}>
                                 {order.status === "READY" && order.coming && (
                                   <div className={styles.onTheWay}>
                                     {t("onTheWay")}
@@ -440,6 +441,7 @@ export function CashierBoard({ token }: { token: string }) {
                                       : t("noPhone")}
                                   </button>
                                 )}
+                                </div>
                               </div>
 
                               {order.status === "PREPARING" && (

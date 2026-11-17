@@ -634,9 +634,21 @@
   justify-content: center;
 }
 
+/* "On the way" and "Phone linked" share one line (wrapping on tiny screens) */
+.statusRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 14px;
+}
+
 .onTheWay {
-  margin-top: 6px;
+  margin-top: 4px;
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
   font-size: 0.8125rem;
   font-weight: 600;
+  white-space: nowrap;
   color: var(--live-ok);
 }

@@ -118,6 +118,10 @@ export function OrderTracker({ token }: { token: string }) {
   // "I'm coming": silences the phone and tells the cashier.
   async function imComing() {
     if (sendingComing) return;
+    // This tap is a user gesture, so it is the moment the browser lets us
+    // (re)open the sound. Without it, "Ring again" would ring silently when
+    // the customer never pressed "Turn sound on".
+    setSoundOn(unlockAudio());
     setSendingComing(true);
     try {
       const res = await fetch(`/api/public/orders/${token}/coming`, {
